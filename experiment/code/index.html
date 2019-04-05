@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Draw Something!</title>
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <link href="custom.css" media="screen" rel="stylesheet" type="text/css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="./node_modules/paper/dist/paper-full.js"></script>
+    <link href="https://vjs.zencdn.net/6.2.8/video-js.css" rel="stylesheet">
+    <script src="https://vjs.zencdn.net/6.2.8/video.js"></script>
+    <script src="trial-sequence.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Schoolbell" rel="stylesheet">
+    <meta  name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' />
+
+
+</head>
+
+<body>
+
+<div id="landingPage">
+    <div class="welcomeHeader">
+        <img src="images/stanfordlogo.png" alt="Stanford University" id="stanfordLogo"></img>
+        <p id='logo-text'>Stanford Language and Cognition Lab</p>
+    </div>
+    <p style="font-family: Schoolbell,cursive; text-align:center; font-size:5vw;"> LET'S DRAW!<p>
+    <img class="imageButton startButton startExp" src="images/play.jpg" id="startConsent"></img>
+    <div class = "condition_box">
+       <div class = "row">
+            <div  class="offset-md-2 col-md-4">
+                <div class="form-group nameForm">
+                    <label>CB</label>
+                    <input id="CB" class="form-control nameInput">
+                </div>
+            </div>
+            <div  class="offset-md-0 col-md-4">
+                    <div class="form-group nameForm">
+                        <label>SubID</label>
+                        <input id="subID" class="form-control nameInput">
+                    </div>
+                </div>
+        </div>     
+    </div>
+</div>
+
+<div id="mainExp" style="display:none">
+
+    <div class = "row" >
+        <canvas class="col-md-6" id="sketchpad" style="display:none"></canvas>
+    </div>
+    <div id = "progressBar_Button" class="row" style="display:none">
+        <div class="col-md-3" id="trialButtonRight">
+            <div class = "drawingButton imageButton" id="keepGoing">
+                <p id="next"> Next </p>
+                <img src="images/play.jpg"></img>
+            </div>
+        </div>                    
+    </div>
+</div>
+
+
+<div id="thanksBing" style="display:none;text-align:center">
+    <div class="welcomeHeader">
+        <img src="images/stanfordlogo.png" alt="Stanford University" id="stanfordLogo"></img>
+        <p id='logo-text'>Stanford Language and Cognition Lab</p>
+    </div>
+    <p style="font-family: Schoolbell,cursive; font-size: 6vw;"> THANK YOU! </p>
+    <img id="smile" src="images/smile.png"></img>
+    <div class="slideButton">
+            <button class="btn btn-info endRestart" id="bingRestart"> &nbsp Play Again ! &nbsp </button>
+    </div>
+</div>
+
+</body>
+</html>
+
+

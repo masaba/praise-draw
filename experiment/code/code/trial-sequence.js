@@ -3,7 +3,23 @@
 Handles dynamic elements of standard kidddraw task
 March 2019 Praise-draw
 
+## progress: set up counterbalancing, basic trial structure
+
+## stimListTest still has funny size; need to check what happens there
+## remove all global 'clicked submit counters'; was bugging 
+## add back cuevideodiv to index.html so we can play videos 
+## need to center the drawing div (off now that we changed some divs....)
+## change size of videos that are being shown so they are full screen
+## log in console which kind of trial we are in for debugging purposes
+## change the kind of data that is sent on each trial (will not always be drawing!)
+## set up basic structure for the memory task trials
+
+
+
 */
+
+
+
 
 
 paper.install(window);
@@ -32,24 +48,6 @@ var subID = $('#subID').val();
 
 var strokeThresh = 3; // each stroke needs to be at least this many pixels long to be sent
 
-// var stimLang = {
-//     "square": "square",
-//     "triangle": "triangle",
-//     "rectangle": "rectangle",
-//     "airplane": "an airplane",
-//     "bike": "a bike",
-//     "bird": "a bird",
-//     "car": "a car",
-//     "cat": "a cat",
-//     "chair": "a chair",
-//     "cup": "a cup",
-//     "hat": "a hat",
-//     "house": "a house",
-//     "rabbit": "a rabbit",
-//     "tree": "a tree",
-//     "watch": "a watch", 
-// }
-
 
 
 // HELPER FUNCTIONS - GENERAL
@@ -75,102 +73,127 @@ function shuffle (a)
 
 // Make stimulus list function, called later
 function getStimuliList(){
-    // Get counterbalancing order from formula (should be 1 or 2)
+    // Get counterbalancing order from formula (should be 1 through 8)
     var CB = $('#CB').val();
 
-    // tracing trials as variables for afterwards
-    var trace1 = {"condition":"S","category":"this square", "video": "trace_square.mp4", "image":"images/square.png"}
-    var trace2 = {"condition":"S","category":"this shape", "video": "trace_shape.mp4","image":"images/shape.png"}
-
-    // Which validation trials are we using?
-    whichValidation = getRandomInt(1, 2)
-    //
-    var triangle_semantic = {"condition":"S","category":"triangle", "video": "triangle.mp4"}
-    var triangle_perception = {"condition":"P","category":"triangle", "image": "images_photocues/triangle.png", "audio_perception":"audio/triangle.wav" }
-    var rect_semantic = {"condition":"S","category":"rectangle", "video": "rectangle.mp4"}
-    var rect_perception= {"condition":"P","category":"rectangle", "image": "images_photocues/rectangle.png" , "audio_perception":"audio/rectangle.wav" }
-  
-    if (whichValidation==1){ 
-        semantic_validation = triangle_semantic;
-        perception_validation = rect_perception;
-    }
-    else if (whichValidation==2){ 
-        semantic_validation = rect_semantic;
-        perception_validation = triangle_perception;
-    }
-
-    // Get list of categories and shuffle them
-    categories = ['airplane','bike','bird','car','cat','chair','cup','hat','house','rabbit','tree','watch'] // full list of test categories 
-    categories = shuffle(categories)
-    stimList = []
-    halfway_index = categories.length / 2
-
-    for(var j = 0; j < (categories.length); j++){
-            this_category = categories[j]
-
-            // if in the first six categories and CB1, semantic condition
-            if (j<halfway_index && CB == 1){
-                condition = 'S'
-            }
-            // if in the first six categories and CB1, perception condition
-            else if (j>(halfway_index-1) && CB==1){
-                condition = 'P'
-            }
-            // if in the first six categories and CB2, perception condition
-            else if (j<halfway_index && CB==2){
-                condition = 'P'
-            }
-            // if in the first six categories and CB2, semantoc condition
-            else if (j>(halfway_index-1) && CB==2){
-                condition = 'S'
-            }
-            else {
-                error("Condition was entered incorrectly! Should be 1 or 2")
-            }
-
-            // Push all of the relevant info into the stimuli list; requires videos and images to be named correctly!
-            stimList.push({"condition":condition, "video": this_category + ".mp4", "category": this_category, 
-                "audio_perception":"audio/" + this_category + ".wav" , "image": "images_photocues/" + this_category + "_" + getRandomInt(1, 3) + ".png"});
-    }
     
+    // exp_phase variable types: T: tracing / warm up phase, V: video, D: drawing, M: memory_test
 
-    if (CB==1) { // semantic first, insert perception halfway
-        stimList.splice(halfway_index,0,perception_validation) // 
-        stimList.unshift(semantic_validation); // 
-    } else if (CB==2) {
-        stimList.splice(halfway_index,0,semantic_validation) // 
-        stimList.unshift(perception_validation); // 
+    // tracing trials
+    var tryit = {"exp_phase":"T","category":"try it out!", "video": "trace_square.mp4", "image":"images/square.png"}
+    var trace1 = {"exp_phase":"T","category":"this square", "video": "trace_square.mp4", "image":"images/square.png"}
+    var trace2 = {"exp_phase":"T","category":"this shape", "video": "trace_shape.mp4","image":"images/shape.png"}
+
+    // difference combinations of overpraise v selective teacher videos
+    var overpraise_avery_set1 = {"exp_phase":"V","condition":"overpraise","actor": "avery","tracing_set":"set1","video": "videos/overpraise_avery_set1.mp4"}
+    var overpraise_avery_set2 = {"exp_phase":"V","condition":"overpraise","actor": "avery","tracing_set":"set2","video": "videos/overpraise_avery_set2.mp4"}
+
+    var selectivepraise_avery_set1 = {"exp_phase":"V","condition":"selective","actor": "avery","tracing_set":"set1","video": "videos/selective_avery_set1.mp4"}
+    var selectivepraise_avery_set2 = {"exp_phase":"V","condition":"selective","actor": "avery","tracing_set":"set2","video": "videos/selective_avery_set2.mp4"}
+
+    var overpraise_ellie_set1 = {"exp_phase":"V","condition":"overpraise","actor": "ellie","tracing_set":"set1","video": "videos/overpraise_ellie_set1.mp4"}
+    var overpraise_ellie_set2 = {"exp_phase":"V","condition":"overpraise","actor": "ellie","tracing_set":"set2","video": "videos/overpraise_avery_set2.mp4"}
+
+    var selectivepraise_ellie_set1 = {"exp_phase":"V","condition":"selective","actor": "ellie","tracing_set":"set1","video": "videos/selective_ellie_set1.mp4"}
+    var selectivepraise_ellie_set2 = {"exp_phase":"V","condition":"selective","actor": "ellie","tracing_set":"set2","video": "videos/selective_ellie_set2.mp4"}
+
+
+    // drawing element
+    var drawing = {"exp_phase":"D"}
+
+    // distraction video
+    var distraction = {"exp_phase":"V","video": "videos/distraction.mp4"}
+
+    // memory checks
+    var memory_check_set1 = {"exp_phase":"M", "tracing_1" : "images/tracing1_set1.png","tracing_2":"images/tracing1_set1.png"}
+    var memory_check_set2 = {"exp_phase":"M", "tracing_1" : "images/tracing1_set2.png","tracing_2":"images/tracing2_set2.png"}
+
+
+    // Change which of these are presented depending on counterbaancing order
+    
+    // overpraise first, selective praise 2nd, avery=set1, ellie=set2
+    
+    // selective praise first, overpraise 2nd
+    if (CB==1){
+        var teacher1 = selectivepraise_avery_set1
+        var memory_check_1 = memory_check_set1
+
+        var teacher2 = overpraise_ellie_set2
+        var memory_check_2 = memory_check_set2
+        
+    }
+    else if (CB==2){
+        var teacher1 = selectivepraise_avery_set2
+        var memory_check_1 = memory_check_set2
+
+        var teacher2 = overpraise_ellie_set1
+        var memory_check_2 = memory_check_set1
+       
+    }
+    else if (CB==3){
+        var teacher1 = selectivepraise_ellie_set1
+        var memory_check_1 = memory_check_set1
+
+        var teacher2 = overpraise_avery_set2
+        var memory_check_2 = memory_check_set2
+
+    }
+    else if (CB==4){
+        var teacher1 = selectivepraise_ellie_set2
+        var memory_check_1 = memory_check_set2
+
+        var teacher2 = overpraise_avery_set1
+        var memory_check_2 = memory_check_set1
+        
+    }
+    if (CB==5){ 
+        var teacher1 = overpraise_avery_set1
+        var memory_check_1 = memory_check_set1
+       
+        var teacher2 = selectivepraise_ellie_set2
+        var memory_check_2 = memory_check_set2
+    }
+    else if (CB==6){
+        var teacher1 = overpraise_avery_set2
+        var memory_check_1 = memory_check_set2
+        
+        var teacher2 = selectivepraise_ellie_set1
+        var memory_check_2 = memory_check_set1
+
+    }
+    else if (CB==7){
+        var teacher1 = overpraise_ellie_set1
+        var memory_check_1 = memory_check_set1
+        
+        var teacher2 = selectivepraise_avery_set2
+        var memory_check_2 = memory_check_set2
+
+    }
+    else if (CB==8){
+        var teacher1 = overpraise_ellie_set2
+        var memory_check_1 = memory_check_set2
+
+        var teacher2 = selectivepraise_avery_set1
+        var memory_check_2 = memory_check_set1
+
     }
 
-    stimList.unshift(trace2); // and tracing trial
-    stimList.unshift(trace1); // and warm up trial
-    maxTrials = stimList.length;
+    //
+    // stimList.push(tryIt);//
+    stimList.push(trace1); // 
+    stimList.push(trace2); // 
+    stimList.push(teacher1); // 
+    stimList.push(drawing); // 
+    stimList.push(distraction); // 
+    stimList.push(teacher2); // 
+    stimList.push(drawing); //     
+
+    maxTrials = stimList.length + 1 
 }
 
-
-
-// for each time we start drawings
-function startDrawing(){
-    if (curTrial==0){
-        $(consentPage).hide(); // fade out age screen
-        getStimuliList()
-        beginTrial()
-    }
-    else if (curTrial>0 && curTrial<maxTrials) {
-        if (curTrial == maxTraceTrial){
-            tracing = false
-            $('#sketchpad').css('background-image','');
-        }
-        beginTrial()
-    }
-    else if (curTrial==maxTrials){
-        endExperiment();
-    }
-}
 
 
 function showTaskChangeVideo(callback){
-
     console.log("time for something new")
     $('#photocue').hide();
     var player = loadChangeTaskVideo(); // change video
@@ -182,61 +205,52 @@ function showTaskChangeVideo(callback){
     setTimeout(function() {playVideo(player, drawNext);},1000);
 };
 
+// for each trial, incoporates trial counter
+function startTrial(){
+    clickedSubmit=0 // set back to 0
+    if (curTrial==0){
+        console.log('curTrial=0, getting stimuli')
+        $("#landingPage").hide();
+        $("#mainExp").show();
+        getStimuliList()
+        showTrial()
+    }
+    else if (curTrial>0 && curTrial<maxTrials) {
+        showTrial()
+    }
+    else if (curTrial==maxTrials){
+        endExperiment();
+    }
+}
 
+// switch between experiment phases
 function showTrial(){
-    // Semantic trials
-    if (stimList[curTrial].condition == 'S'){
-        var player = loadNextVideo(curTrial); // change video
-
-        if (tracing){
-            document.getElementById("drawingCue").innerHTML =  stimList[curTrial].category
-        }
-        else{
-            document.getElementById("drawingCue").innerHTML = stimLang[stimList[curTrial].category] 
-        }
-        $('#photocue').hide();
-
+    // Tracing trials
+    if (stimList[curTrial].exp_phase == 'T'){
+        setUpDrawing()
+        console.log('starting tracing trial')
+    }
+    // video only
+    else if (stimList[curTrial].exp_phase == 'V'){
+        player = loadNextVideo()
         // set volume again
         var video = document.getElementById('cueVideo');
         video.volume = 1;
-        drawNext = 1;
+        drawNext = 0;
+        // play video 1 second player
         setTimeout(function() {playVideo(player, drawNext);},1000);
     }
-    // Perception trails
-    else if (stimList[curTrial].condition == 'P'){
-        document.getElementById("drawingCue").innerHTML = "this "+ stimList[curTrial].category
-        $('#cueVideoDiv').hide();
-        var imgPath = stimList[curTrial].image;
-        $("#photocue").attr("src",imgPath);
-        $('#photocue').fadeIn();
-        var audio = new Audio(stimList[curTrial].audio_perception);
-        audio.volume = 1;
-        audio.play();
-        setTimeout(
-            function() {
-                setUpDrawing();
-            },
-            6000);
+    // drawing trials
+    else if (stimList[curTrial].exp_phase == 'D'){
+        setUpDrawing()
     }
-    else{
-        alert("There is an error with the condition.");
+    else if (stimList[curTrial].exp_phase == 'M'){
+        setUpMemoryTest() // NOT DONE YET
     }
 }
 
-//
-function beginTrial(){
-    $('#progressBar_Button').hide();
-    $('#sketchpad').hide();
-    $('#mainExp').fadeIn('fast');
 
-    // 
-    if (curTrial==(halfway_index + numPracticeTrials)) {
-        showTaskChangeVideo(); // in between two tasks e.g., S and P, but before validation trial for next task
-    }
-    else{
-        showTrial();
-    }
-}
+
 
 // video player functions
 function playVideo(player, drawNext){
@@ -272,24 +286,6 @@ function playVideo(player, drawNext){
     });
 }
 
-function loadChangeTaskVideo(){
-    $("#cueVideoDiv").html("<video id='cueVideo' class='video-js' playsinline poster='https://dummyimage.com/320x240/ffffff/fff'> </video>");
-    var player=videojs('cueVideo',
-        {
-            "controls": false,
-            "preload":"auto"
-        },
-        function() {
-            this.volume(1);
-        }
-    );
-    player.pause();
-    player.volume(1); // set volume to max
-
-    player.src({ type: "video/mp4", src: "videos/something_new.mp4" });
-    player.load();
-    return player;
-}
 
 function loadNextVideo(){
     $("#cueVideoDiv").html("<video id='cueVideo' class='video-js' playsinline poster='https://dummyimage.com/320x240/ffffff/fff' >  </video>");
@@ -315,32 +311,19 @@ function setUpDrawing(){
     disableDrawing = false;
     $('#sketchpad').css({"background": "", "opacity":""});
 
-    if (tracing){
+    if (stimList[curTrial].exp_phase == "T"){
         //for all tracing trials, show the tracing image on the canvas
-
         var imageurl = "url('" + stimList[curTrial].image + "')";
         $('#sketchpad').css("background-image", imageurl)
             .css("background-size",imgSize)
             .css("background-repeat", "no-repeat")
             .css("background-position","center center");
-        $("#endMiddle").show();
         $("#keepGoing").show();
-        $("#endGame").hide();
 
-    }else if(stimList[curTrial].category == 'this circle'){
-        //for the circle trial, show the circle image for 1s and hide it.
-
-        var imageurl = "url('" + stimList[curTrial].image + "')";
-        $('#sketchpad').css("background-image", imageurl)
-            .css("background-size",imgSize)
-            .css("background-repeat", "no-repeat")
-            .css("background-position","center center");
-
-        setTimeout(function () {
-            $('#sketchpad').css("background-image", "");
-        }, 1000);
-
-    }else if(curTrial == maxTrials-1){
+    }else if (stimList[curTrial].exp_phase == "D"){
+       $('#sketchpad').css('background-image','');
+    }
+    else if(curTrial == maxTrials-1){
         $("#endMiddle").hide();
         $("#keepGoing").hide();
         $("#endGame").show();
@@ -348,50 +331,8 @@ function setUpDrawing(){
 
     $('#progressBar_Button').show()
     $('#sketchpad').show()
-    monitorProgress(); // since we now have a timeout function 
-};
+    startTrialTime = Date.now()
 
-function monitorProgress(){
-    clickedSubmit=0;
-    startTrialTime=Date.now();
-    console.log('starting monitoring')
-    progress(timeLimit, timeLimit, $('.progress')); // show progress bar
-    $('.progress-bar').attr('aria-valuemax',timeLimit);
-    $('.progress').show(); // don't show progress bar until we start monitorung
-};
-
-//  monitoring progress spent on a trial and triggering next events
-function progress(timeleft, timetotal, $element) {
-    var progressBarWidth = timeleft * $element.width()/ timetotal;
-    var totalBarWidth = $element.width();
-    $element.find('.progress-bar').attr("aria-valuenow", timeleft).text(timeleft)
-    $element.find('.progress-bar').animate({ width: progressBarWidth }, timeleft == timetotal ? 0 : 1000, "linear");
-    console.log("clicked submit = " + clickedSubmit)
-    console.log("time left = " + timeleft)
-
-    if(timeleft > 0 & clickedSubmit==0) {
-        setTimeout(function() {
-            progress(timeleft - 1, timetotal, $element);
-        }, 1000);
-    }
-    else if(timeleft == 0 & clickedSubmit==0){
-        console.log("trial timed out")
-        increaseTrial();
-        clickedSubmit =1 // it's as if we clicked submit
-        disableDrawing = true
-        if($("#endGame").css("display")!="none"){
-            $('#endGame').addClass('bounce')
-        }else {
-            $('#keepGoing').addClass('bounce')
-        }
-        $("#sketchpad").css({"background":"linear-gradient(#17a2b81f, #17a2b81f)", "opacity":"0.5"});
-        return; //  get out of here
-    }
-    else if (clickedSubmit==1){
-        console.log("exiting out of progress function")
-        $element.find('.progress-bar').width(totalBarWidth)
-        return; //  get out of here, data being saved by other button
-    }
 };
 
 // saving data functions
@@ -439,34 +380,7 @@ function saveSketchData(){
     socket.emit('current_data', current_data);
 };
 
-
-function setLanguage(lang){
-    //If the user choose English, no change on the webpage
-    if (lang=="English") return;
-
-    //If the user choose other langauges
-    var filename = "language/"+lang +".json";
-    $.getJSON(filename, function( data ) {
-        var items = [];
-        $.each( data.webpage, function( key, val ) {
-            if (key=="parentEmail"){
-                $("#parentEmail").attr("placeholder",val);
-            }else {
-                var id = "#" + key;
-                $(id).text(val);
-            }
-        });
-    });
-}
-
 // experiment navigation functions
-function showConsentPage(){
-    $("#landingPage").hide();
-    $('#parentEmail').val('');
-    $('#email-form').show();
-    $('#emailSent').hide();
-    $(consentPage).fadeIn();
-}
 
 function restartExperiment() {
     window.location.reload(true);
@@ -487,6 +401,7 @@ function endExperiment(){
 function increaseTrial(){
     saveSketchData() // save first!
     curTrial=curTrial+1; // increase counter
+    startTrial()
 }
 
 function isDoubleClicked(element) {
@@ -504,27 +419,17 @@ function isDoubleClicked(element) {
 }
 
 window.onload = function() {
-    $.get("/mode", function(data){
-        mode = data.mode;
-        if(mode=='Bing') {
-            consentPage = '#consentBing';
-            thanksPage = "#thanksBing";
-            console.log(" mode Bing")
-        }else if(mode=="CDM"){
-            consentPage = '#consentCDM';
-            thanksPage = "#thanksPage";
-            console.log("mode CDM")
-        }
-    });
 
-
+    thanksPage = "#thanksBing";
     document.ontouchmove = function(event){
         event.preventDefault();
     }
 
-
-    $('#startConsent').bind('touchstart mousedown',function(e) {
+    $('.startExp').bind('touchstart mousedown',function (e) {
         e.preventDefault()
+        // if (isDoubleClicked($(this))) return;
+
+        console.log('touched start button');
 
         if ($("#CB").val().trim().length==0){
                 alert("Please let the researcher enter your condition.");
@@ -533,51 +438,7 @@ window.onload = function() {
             alert("Please enter a valid counterbalancing condition (1,2)");
         }
         else{
-            showConsentPage();
-        }
-        // }
-    });
-
-    $('.langButton').bind('touchstart mousedown',function(e) {
-        e.preventDefault()
-        // if (isDoubleClicked($(this))) return;
-        language = $(this).attr('id');
-        setLanguage(language);
-        showConsentPage();
-    });
-
-
-    $('.startExp').bind('touchstart mousedown',function (e) {
-        e.preventDefault()
-        // if (isDoubleClicked($(this))) return;
-
-        console.log('touched start button');
-
-        if (mode == "Bing"){
-            console.log("Bing");
-
-            if ($("#firstName").val().trim().length==0 ) {
-                alert("Please enter your first name.");
-            }else if($("#lastName").val().trim().length==0){
-                alert("Please enter your last name.");
-            }
-            else if ($("#condition").val().trim().length==0){
-                alert("Please let the researcher enter your condition.");
-            }
-            else{
-                startDrawing();
-            }
-
-        }else{
-            console.log("CDM");
-            if (!$("#checkConsent").is(':checked')) {
-                alert("Can we use your child's drawings? If so, please click the box above to start drawing!")
-            }else if($(".active").val()==undefined){
-                alert("Please select your age group.")
-            }
-            else {
-                startDrawing();
-            }
+            startTrial();
         }
 
     });
@@ -589,14 +450,12 @@ window.onload = function() {
         $('#keepGoing').removeClass('bounce')
 
         console.log('touched next trial button');
-        if(clickedSubmit==0){// if the current trial has not timed out yet
-            clickedSubmit=1; // indicate that we submitted - global variable
-            increaseTrial(); // save data and increase trial counter
-        }
+        increaseTrial(); // save data and increase trial counter
+    
 
         $('#drawing').hide();
         project.activeLayer.removeChildren();
-        startDrawing();
+        startTrial();
     });
 
     $('.allDone').bind('touchstart mousedown',function(e) {
@@ -604,10 +463,8 @@ window.onload = function() {
         // if (isDoubleClicked($(this))) return;
 
         console.log('touched endExperiment  button');
-        if(clickedSubmit==0){// if the current trial has not timed out yet
-            clickedSubmit=1; // indicate that we submitted - global variable
-            increaseTrial(); // save data and increase trial counter
-        }
+        increaseTrial(); // save data and increase trial counter
+        
         $('#mainExp').hide();
         $('#drawing').hide();
         $('#keepGoing').removeClass('bounce')

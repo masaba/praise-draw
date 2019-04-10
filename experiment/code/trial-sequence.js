@@ -3,16 +3,9 @@
 Handles dynamic elements of standard kidddraw task
 March 2019 Praise-draw
 
-## progress: set up counterbalancing, basic trial structure
-
-## stimListTest still has funny size; need to check what happens there
-## remove all global 'clicked submit counters'; was bugging 
-## add back cuevideodiv to index.html so we can play videos 
-## need to center the drawing div (off now that we changed some divs....)
-## change size of videos that are being shown so they are full screen
-## log in console which kind of trial we are in for debugging purposes
+left to do:
+## change size of videos that are being shown so they are full screen (check on ipad)
 ## change the kind of data that is sent on each trial (will not always be drawing!)
-## set up basic structure for the memory task trials
 
 */
 paper.install(window);
@@ -68,9 +61,8 @@ function getStimuliList(){
 
     
     // exp_phase variable types: T: tracing / warm up phase, V: video, D: drawing, M: memory_test
-
     // tracing trials
-    var tryit = {"exp_phase":"T","category":"try it out!", "video": "trace_square.mp4", "image":"images/square.png"}
+    var tryit = {"exp_phase":"D","category":"try it out!"}
     var trace1 = {"exp_phase":"T","category":"this square", "video": "trace_square.mp4", "image":"images/square.png"}
     var trace2 = {"exp_phase":"T","category":"this shape", "video": "trace_shape.mp4","image":"images/shape.png"}
 
@@ -82,7 +74,7 @@ function getStimuliList(){
     var selectivepraise_karen_set2 = {"exp_phase":"V","condition":"selective","actor": "karen","tracing_set":"set2","video": "videos/selectivepraise_karen_set2.mp4"}
 
     var overpraise_linda_set1 = {"exp_phase":"V","condition":"overpraise","actor": "linda","tracing_set":"set1","video": "videos/overpraise_linda_set1.mp4"}
-    var overpraise_linda_set2 = {"exp_phase":"V","condition":"overpraise","actor": "linda","tracing_set":"set2","video": "videos/overpraise_karen_set2.mp4"}
+    var overpraise_linda_set2 = {"exp_phase":"V","condition":"overpraise","actor": "linda","tracing_set":"set2","video": "videos/overpraise_linda_set2.mp4"}
 
     var selectivepraise_linda_set1 = {"exp_phase":"V","condition":"selective","actor": "linda","tracing_set":"set1","video": "videos/selectivepraise_linda_set1.mp4"}
     var selectivepraise_linda_set2 = {"exp_phase":"V","condition":"selective","actor": "linda","tracing_set":"set2","video": "videos/selectivepraise_linda_set2.mp4"}
@@ -96,7 +88,7 @@ function getStimuliList(){
     var selectivepraise_karen_set2_mem = {"exp_phase":"M","condition":"selective","actor": "karen","tracing_set":"set2","image": "test_images/selectivepraise_karen_set2.png"}
 
     var overpraise_linda_set1_mem = {"exp_phase":"M","condition":"overpraise","actor": "linda","tracing_set":"set1","image": "test_images/overpraise_linda_set1.png"}
-    var overpraise_linda_set2_mem = {"exp_phase":"M","condition":"overpraise","actor": "linda","tracing_set":"set2","image": "videos/overpraise_karen_set2.png"}
+    var overpraise_linda_set2_mem = {"exp_phase":"M","condition":"overpraise","actor": "linda","tracing_set":"set2","image": "test_images/overpraise_linda_set2.png"}
 
     var selectivepraise_linda_set1_mem = {"exp_phase":"M","condition":"selective","actor": "linda","tracing_set":"set1","image": "test_images/selectivepraise_linda_set1.png"}
     var selectivepraise_linda_set2_mem = {"exp_phase":"M","condition":"selective","actor": "linda","tracing_set":"set2","image": "test_images/selectivepraise_linda_set2.png"}
@@ -204,22 +196,9 @@ function getStimuliList(){
     stimList.push(drawing_start_2); // 
     stimList.push(drawing); //     
 
-    maxTrials = stimList.length + 1 
+    maxTrials = stimList.length
 }
 
-
-
-function showTaskChangeVideo(callback){
-    console.log("time for something new")
-    $('#photocue').hide();
-    var player = loadChangeTaskVideo(); // change video
-    // set volume again
-    var video = document.getElementById('cueVideo');
-    video.volume = 1;
-    drawNext = 0;
-    document.getElementById("drawingCue").innerHTML =  " &nbsp; &nbsp;  &nbsp; "
-    setTimeout(function() {playVideo(player, drawNext);},1000);
-};
 
 // for each trial, incoporates trial counter
 function startTrial(){
@@ -248,22 +227,29 @@ function showTrial(){
     }
     // video only
     else if (stimList[curTrial].exp_phase == 'V'){
-        $("#sketchpad").hide(); 
-        player = loadNextVideo()
+        // make sure irrelevant stuff is viddent
+        $('#testImageDiv').hide()
+        $("#sketchpad").hide()
         // play video 1 second later
+        player = loadNextVideo()
         setTimeout(function() {playVideo(player);},1000);
     }
     // drawing trials
     else if (stimList[curTrial].exp_phase == 'D'){
+        $('#testImageDiv').hide()
         $("#sketchpad").show();
         setUpDrawing()
     }
     else if (stimList[curTrial].exp_phase == 'M'){
+        $("#sketchpad").hide();
         setUpMemoryTest() // NOT DONE YET
     }
 }
 
-
+function setUpMemoryTest(){
+    $('#testImageDiv').children('img').attr('src', stimList[curTrial].image);
+    $('#testImageDiv').fadeIn()
+}
 
 
 // video player functions
@@ -384,12 +370,13 @@ function saveSketchData(){
 };
 
 // experiment navigation functions
-
 function restartExperiment() {
     window.location.reload(true);
 }
 
 function endExperiment(){
+    $('#keepGoing').hide();
+    $('#sketchpad').hide();
     $(thanksPage).show();
     curTrial = -1;
     //wait for 1min and restart
@@ -404,25 +391,13 @@ function endExperiment(){
 function increaseTrial(){
     if (stimList[curTrial].exp_phase=='D' | stimList[curTrial].exp_phase=='T'){
         saveSketchData() // save first!
+        // console.log('curTrial was ' curTrial)
         console.log('saving sketch data')
     }
     curTrial=curTrial+1; // increase counter
     startTrial()
 }
 
-function isDoubleClicked(element) {
-    //if already clicked return TRUE to indicate this click is not allowed
-    if (element.data("isclicked")) return true;
-
-    //mark as clicked for 2 second
-    element.data("isclicked", true);
-    setTimeout(function () {
-        element.removeData("isclicked");
-    }, 2000);
-
-    //return FALSE to indicate this click was allowed
-    return false;
-}
 
 window.onload = function() {
 
@@ -451,34 +426,15 @@ window.onload = function() {
 
     $('#keepGoing').bind('touchstart mousedown',function(e) {
         e.preventDefault()
-        if (isDoubleClicked($(this))) return;
-
-        $('#keepGoing').removeClass('bounce')
-
-        console.log('touched next trial button');
-        increaseTrial(); // save data and increase trial counter    
-        project.activeLayer.removeChildren(); // clear sketch pad
-    });
-
-    $('.allDone').bind('touchstart mousedown',function(e) {
-        e.preventDefault()
-        // if (isDoubleClicked($(this))) return;
-
-        console.log('touched endExperiment  button');
-        increaseTrial(); // save data and increase trial counter
-        
-        $('#mainExp').hide();
-        $('#keepGoing').removeClass('bounce')
-        endExperiment();
-
-    });
-
-    $('.endRestart').bind('touchstart mousedown',function(e){
-        e.preventDefault()
-        // if (isDoubleClicked($(this))) return;
-
-        console.log('restart to the landing page')
-        restartExperiment()
+        // don't advance during videos even if clicked
+        if (stimList[curTrial].exp_phase=='V'){
+            console.log('touched next trial button during video, do nothing');
+        }
+        else{
+            console.log('touched next trial button, advancing');
+            increaseTrial(); // save data and increase trial counter    
+            project.activeLayer.removeChildren(); // clear sketch pad     
+        }
     });
 
     // Set up drawing canvas
@@ -505,12 +461,9 @@ window.onload = function() {
         var svgString = path.exportSVG({asString: true});
         var category = stimList[curTrial].category; // category name
         var condition = stimList[curTrial].condition; // should be S or P
-        var imageName = stimList[curTrial].image; // actual image IF it was a P trial, saved in general even if not used for S trials...
-        var age = $('.active').attr('id'); // age value
+        var imageName = stimList[curTrial].image; // 
         var CB = $('#CB').val(); // counterbalancing (1,2)
-        var whichValidation = whichValidation;
-        var subID = $('#subID').val();
-        
+        var subID = $('#subID').val();        
         var readable_date = new Date();
         
         console.log('time since we started the trial')
@@ -541,7 +494,6 @@ window.onload = function() {
         // send stroke data to server
         console.log(stroke_data)
         socket.emit('stroke',stroke_data);
-        
     }
 
 

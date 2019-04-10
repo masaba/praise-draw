@@ -159,8 +159,9 @@ button[disabled] {
     /*left: 2.5%;*/
     border: solid 5px #999;
     display: block;
-    margin-left: 4vw;
-    margin-top: 0.5vh;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 2vh;
 }
 
 #kidConsent {
@@ -359,7 +360,8 @@ button[disabled] {
 
 
 #keepGoing {
-    margin-right: 2vw;
+    position: absolute;
+    right: 0px;
     font-family: Schoolbell,cursive;
     cursor:pointer;
 }
@@ -469,10 +471,11 @@ button[disabled] {
     justify-content: center;
 }
 
-#photocue{
+#testImage{
     width: auto;
-    height: 60vh;
+    height: 70vh;
     margin-top: 8vh;
+    margin-left: 5vh;
     /* border: solid 5px #999; */
 
 }

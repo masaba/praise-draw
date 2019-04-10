@@ -14,16 +14,9 @@ March 2019 Praise-draw
 ## change the kind of data that is sent on each trial (will not always be drawing!)
 ## set up basic structure for the memory task trials
 
-
-
 */
-
-
-
-
-
 paper.install(window);
-socket = io.connect();
+socket = io.connect(); // for data sending
 
 // Set global variables
 var curTrial=0 // global variable, trial counter
@@ -48,14 +41,11 @@ var subID = $('#subID').val();
 
 var strokeThresh = 3; // each stroke needs to be at least this many pixels long to be sent
 
-
-
 // HELPER FUNCTIONS - GENERAL
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// shuffle the order of drawing trials
 function shuffle (a)
 {
     var o = [];
@@ -85,107 +75,133 @@ function getStimuliList(){
     var trace2 = {"exp_phase":"T","category":"this shape", "video": "trace_shape.mp4","image":"images/shape.png"}
 
     // difference combinations of overpraise v selective teacher videos
-    var overpraise_avery_set1 = {"exp_phase":"V","condition":"overpraise","actor": "avery","tracing_set":"set1","video": "videos/overpraise_avery_set1.mp4"}
-    var overpraise_avery_set2 = {"exp_phase":"V","condition":"overpraise","actor": "avery","tracing_set":"set2","video": "videos/overpraise_avery_set2.mp4"}
+    var overpraise_karen_set1 = {"exp_phase":"V","condition":"overpraise","actor": "karen","tracing_set":"set1","video": "videos/overpraise_karen_set1.mp4"}
+    var overpraise_karen_set2 = {"exp_phase":"V","condition":"overpraise","actor": "karen","tracing_set":"set2","video": "videos/overpraise_karen_set2.mp4"}
 
-    var selectivepraise_avery_set1 = {"exp_phase":"V","condition":"selective","actor": "avery","tracing_set":"set1","video": "videos/selective_avery_set1.mp4"}
-    var selectivepraise_avery_set2 = {"exp_phase":"V","condition":"selective","actor": "avery","tracing_set":"set2","video": "videos/selective_avery_set2.mp4"}
+    var selectivepraise_karen_set1 = {"exp_phase":"V","condition":"selective","actor": "karen","tracing_set":"set1","video": "videos/selectivepraise_karen_set1.mp4"}
+    var selectivepraise_karen_set2 = {"exp_phase":"V","condition":"selective","actor": "karen","tracing_set":"set2","video": "videos/selectivepraise_karen_set2.mp4"}
 
-    var overpraise_ellie_set1 = {"exp_phase":"V","condition":"overpraise","actor": "ellie","tracing_set":"set1","video": "videos/overpraise_ellie_set1.mp4"}
-    var overpraise_ellie_set2 = {"exp_phase":"V","condition":"overpraise","actor": "ellie","tracing_set":"set2","video": "videos/overpraise_avery_set2.mp4"}
+    var overpraise_linda_set1 = {"exp_phase":"V","condition":"overpraise","actor": "linda","tracing_set":"set1","video": "videos/overpraise_linda_set1.mp4"}
+    var overpraise_linda_set2 = {"exp_phase":"V","condition":"overpraise","actor": "linda","tracing_set":"set2","video": "videos/overpraise_karen_set2.mp4"}
 
-    var selectivepraise_ellie_set1 = {"exp_phase":"V","condition":"selective","actor": "ellie","tracing_set":"set1","video": "videos/selective_ellie_set1.mp4"}
-    var selectivepraise_ellie_set2 = {"exp_phase":"V","condition":"selective","actor": "ellie","tracing_set":"set2","video": "videos/selective_ellie_set2.mp4"}
+    var selectivepraise_linda_set1 = {"exp_phase":"V","condition":"selective","actor": "linda","tracing_set":"set1","video": "videos/selectivepraise_linda_set1.mp4"}
+    var selectivepraise_linda_set2 = {"exp_phase":"V","condition":"selective","actor": "linda","tracing_set":"set2","video": "videos/selectivepraise_linda_set2.mp4"}
 
+
+    //// memory test equivalent
+    var overpraise_karen_set1_mem = {"exp_phase":"M","condition":"overpraise","actor": "karen","tracing_set":"set1","image": "test_images/overpraise_karen_set1.png"}
+    var overpraise_karen_set2_mem = {"exp_phase":"M","condition":"overpraise","actor": "karen","tracing_set":"set2","image": "test_images/overpraise_karen_set2.png"}
+
+    var selectivepraise_karen_set1_mem = {"exp_phase":"M","condition":"selective","actor": "karen","tracing_set":"set1","image": "test_images/selectivepraise_karen_set1.png"}
+    var selectivepraise_karen_set2_mem = {"exp_phase":"M","condition":"selective","actor": "karen","tracing_set":"set2","image": "test_images/selectivepraise_karen_set2.png"}
+
+    var overpraise_linda_set1_mem = {"exp_phase":"M","condition":"overpraise","actor": "linda","tracing_set":"set1","image": "test_images/overpraise_linda_set1.png"}
+    var overpraise_linda_set2_mem = {"exp_phase":"M","condition":"overpraise","actor": "linda","tracing_set":"set2","image": "videos/overpraise_karen_set2.png"}
+
+    var selectivepraise_linda_set1_mem = {"exp_phase":"M","condition":"selective","actor": "linda","tracing_set":"set1","image": "test_images/selectivepraise_linda_set1.png"}
+    var selectivepraise_linda_set2_mem = {"exp_phase":"M","condition":"selective","actor": "linda","tracing_set":"set2","image": "test_images/selectivepraise_linda_set2.png"}
 
     // drawing element
     var drawing = {"exp_phase":"D"}
 
-    // distraction video
-    var distraction = {"exp_phase":"V","video": "videos/distraction.mp4"}
+    // videos before drawing starts vary with teachers
+    var drawing_start_linda = {"exp_phase":"V","actor": "linda","video": "videos/linda_test.mp4"}
+    var drawing_start_karen = {"exp_phase":"V","actor": "karen","video": "videos/karen_test.mp4"}
 
-    // memory checks
-    var memory_check_set1 = {"exp_phase":"M", "tracing_1" : "images/tracing1_set1.png","tracing_2":"images/tracing1_set1.png"}
-    var memory_check_set2 = {"exp_phase":"M", "tracing_1" : "images/tracing1_set2.png","tracing_2":"images/tracing2_set2.png"}
+    // distraction video
+    var distraction = {"exp_phase":"V","video": "videos/distractor_" + getRandomInt(1,3) + ".mp4"} // get random distractor videos
 
 
     // Change which of these are presented depending on counterbaancing order
-    
-    // overpraise first, selective praise 2nd, avery=set1, ellie=set2
-    
-    // selective praise first, overpraise 2nd
     if (CB==1){
-        var teacher1 = selectivepraise_avery_set1
-        var memory_check_1 = memory_check_set1
+        var teacher1 = selectivepraise_karen_set1
+        var memory_check_1 = selectivepraise_karen_set1_mem
+        var drawing_start_1 = drawing_start_karen
 
-        var teacher2 = overpraise_ellie_set2
-        var memory_check_2 = memory_check_set2
-        
+        var teacher2 = overpraise_linda_set2
+        var memory_check_2 = overpraise_linda_set2_mem
+        var drawing_start_2 = drawing_start_linda
     }
     else if (CB==2){
-        var teacher1 = selectivepraise_avery_set2
-        var memory_check_1 = memory_check_set2
+        var teacher1 = selectivepraise_karen_set2
+        var memory_check_1 = selectivepraise_karen_set2_mem
+        var drawing_start_1 = drawing_start_karen
 
-        var teacher2 = overpraise_ellie_set1
-        var memory_check_2 = memory_check_set1
-       
+        var teacher2 = overpraise_linda_set1
+        var memory_check_2 = overpraise_linda_set1_mem
+        var drawing_start_2 = drawing_start_linda
     }
     else if (CB==3){
-        var teacher1 = selectivepraise_ellie_set1
-        var memory_check_1 = memory_check_set1
+        var teacher1 = selectivepraise_linda_set1
+        var memory_check_1 = selectivepraise_linda_set1_mem
+        var drawing_start_1 = drawing_start_linda
 
-        var teacher2 = overpraise_avery_set2
-        var memory_check_2 = memory_check_set2
-
+        var teacher2 = overpraise_karen_set2
+        var memory_check_2 = overpraise_karen_set2_mem
+        var drawing_start_2 = drawing_start_karen
     }
     else if (CB==4){
-        var teacher1 = selectivepraise_ellie_set2
-        var memory_check_1 = memory_check_set2
+        var teacher1 = selectivepraise_linda_set2
+        var memory_check_1 = selectivepraise_linda_set2_mem
+        var drawing_start_1 = drawing_start_linda
 
-        var teacher2 = overpraise_avery_set1
-        var memory_check_2 = memory_check_set1
+        var teacher2 = overpraise_karen_set1
+        var memory_check_2 = overpraise_karen_set1_mem
+        var drawing_start_2 = drawing_start_karen
         
     }
     if (CB==5){ 
-        var teacher1 = overpraise_avery_set1
-        var memory_check_1 = memory_check_set1
+        var teacher1 = overpraise_karen_set1
+        var memory_check_1 = overpraise_karen_set1_mem
+        var drawing_start_1 = drawing_start_karen
        
-        var teacher2 = selectivepraise_ellie_set2
-        var memory_check_2 = memory_check_set2
+        var teacher2 = selectivepraise_linda_set2
+        var memory_check_2 = selectivepraise_linda_set2_mem
+        var drawing_start_2 = drawing_start_linda
+
     }
     else if (CB==6){
-        var teacher1 = overpraise_avery_set2
-        var memory_check_1 = memory_check_set2
+        var teacher1 = overpraise_karen_set2
+        var memory_check_1 = overpraise_karen_set2_mem
+        var drawing_start_1 = drawing_start_karen
         
-        var teacher2 = selectivepraise_ellie_set1
-        var memory_check_2 = memory_check_set1
+        var teacher2 = selectivepraise_linda_set1
+        var memory_check_2 = selectivepraise_linda_set1_mem
+        var drawing_start_2 = drawing_start_linda
 
     }
     else if (CB==7){
-        var teacher1 = overpraise_ellie_set1
-        var memory_check_1 = memory_check_set1
-        
-        var teacher2 = selectivepraise_avery_set2
-        var memory_check_2 = memory_check_set2
+        var teacher1 = overpraise_linda_set1
+        var memory_check_1 = overpraise_linda_set1_mem
+        var drawing_start_1 = drawing_start_linda
+
+        var teacher2 = selectivepraise_karen_set2
+        var memory_check_2 = selectivepraise_karen_set2_mem
+        var drawing_start_2 = drawing_start_karen
 
     }
     else if (CB==8){
-        var teacher1 = overpraise_ellie_set2
-        var memory_check_1 = memory_check_set2
+        var teacher1 = overpraise_linda_set2
+        var memory_check_1 = overpraise_linda_set2_mem
+        var drawing_start_1 = drawing_start_linda
 
-        var teacher2 = selectivepraise_avery_set1
-        var memory_check_2 = memory_check_set1
+        var teacher2 = selectivepraise_karen_set1
+        var memory_check_2 = selectivepraise_karen_set1_mem
+        var drawing_start_2 = drawing_start_karen
 
     }
 
-    //
     // stimList.push(tryIt);//
     stimList.push(trace1); // 
     stimList.push(trace2); // 
     stimList.push(teacher1); // 
+    stimList.push(memory_check_1); //
+    stimList.push(drawing_start_1); // 
     stimList.push(drawing); // 
     stimList.push(distraction); // 
     stimList.push(teacher2); // 
+    stimList.push(memory_check_2); // 
+    stimList.push(drawing_start_2); // 
     stimList.push(drawing); //     
 
     maxTrials = stimList.length + 1 
@@ -232,16 +248,14 @@ function showTrial(){
     }
     // video only
     else if (stimList[curTrial].exp_phase == 'V'){
+        $("#sketchpad").hide(); 
         player = loadNextVideo()
-        // set volume again
-        var video = document.getElementById('cueVideo');
-        video.volume = 1;
-        drawNext = 0;
-        // play video 1 second player
-        setTimeout(function() {playVideo(player, drawNext);},1000);
+        // play video 1 second later
+        setTimeout(function() {playVideo(player);},1000);
     }
     // drawing trials
     else if (stimList[curTrial].exp_phase == 'D'){
+        $("#sketchpad").show();
         setUpDrawing()
     }
     else if (stimList[curTrial].exp_phase == 'M'){
@@ -253,25 +267,15 @@ function showTrial(){
 
 
 // video player functions
-function playVideo(player, drawNext){
+function playVideo(player){
     player.ready(function() { // need to wait until video is ready
         $('#cueVideoDiv').fadeIn(); // show video div only after video is ready
-
+        player.requestFullscreen();
         this.play();
         this.on('ended', function () {
 
             // only want to start drawing if we are not on the "something new" video
-            if (drawNext == 1) {
-                console.log('video ends and drawing starts');
-                $('#cueVideoDiv').fadeOut(); 
-                setTimeout(function(){
-                    player.dispose(); //dispose the old video and related eventlistener. Add a new video
-                }, 500);
-                setUpDrawing();
-
-            }
-            else {
-                console.log('starting normal trials...something new');
+                console.log('video over, starting next trial...');
                 $('#cueVideoDiv').fadeOut();
                 setTimeout(function(){
                     player.dispose(); //dispose the old video and related eventlistener. Add a new video
@@ -279,9 +283,8 @@ function playVideo(player, drawNext){
 
                 // add slight delay between something new and start of new trials
                 setTimeout(function () {
-                    showTrial();
+                    increaseTrial();
                 }, 1000);
-            }
         });
     });
 }
@@ -301,7 +304,7 @@ function loadNextVideo(){
     player.pause();
     player.volume(1); // set volume to max
     console.log(stimList[curTrial].video)
-    player.src({ type: "video/mp4", src: "videos/" + stimList[curTrial].video });
+    player.src({ type: "video/mp4", src: stimList[curTrial].video });
     player.load();
     return player;
 }
@@ -399,7 +402,10 @@ function endExperiment(){
 }
 
 function increaseTrial(){
-    saveSketchData() // save first!
+    if (stimList[curTrial].exp_phase=='D' | stimList[curTrial].exp_phase=='T'){
+        saveSketchData() // save first!
+        console.log('saving sketch data')
+    }
     curTrial=curTrial+1; // increase counter
     startTrial()
 }
@@ -450,12 +456,8 @@ window.onload = function() {
         $('#keepGoing').removeClass('bounce')
 
         console.log('touched next trial button');
-        increaseTrial(); // save data and increase trial counter
-    
-
-        $('#drawing').hide();
-        project.activeLayer.removeChildren();
-        startTrial();
+        increaseTrial(); // save data and increase trial counter    
+        project.activeLayer.removeChildren(); // clear sketch pad
     });
 
     $('.allDone').bind('touchstart mousedown',function(e) {
@@ -466,7 +468,6 @@ window.onload = function() {
         increaseTrial(); // save data and increase trial counter
         
         $('#mainExp').hide();
-        $('#drawing').hide();
         $('#keepGoing').removeClass('bounce')
         endExperiment();
 
@@ -478,29 +479,6 @@ window.onload = function() {
 
         console.log('restart to the landing page')
         restartExperiment()
-    });
-
-
-    $('#sendEmail').bind('touchstart mousedown',function(e){
-        e.preventDefault()
-
-        // if (isDoubleClicked($(this))) return;
-        var email = $('#parentEmail').val()
-        $.get("/send", {email:email}, function(data){
-            if(data=="sent"){
-                $('#email-form').hide()
-                $('#emailSent').show()
-            }else{
-                alert('invalid email')
-            }
-        });
-    });
-
-    // for toggling between age buttons
-    $('.ageButton').bind('touchstart mousedown',function(e){
-        e.preventDefault()
-        $('.ageButton').removeClass('active')
-        $(this).addClass('active')
     });
 
     // Set up drawing canvas
@@ -516,7 +494,6 @@ window.onload = function() {
         canvas.height = window.innerHeight*.68;
         canvas.width = canvas.height;
     }
-
 
     /////////////  DRAWING RELATED TOOLS 
     paper.setup('sketchpad');

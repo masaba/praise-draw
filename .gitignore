@@ -4,3 +4,15 @@ experiment/code/node_modules/*
 experiment/code/.DS_Store
 experiment/.DS_Store
 .DS_Store
+experiment/code/praise-draw test/praise-draw test/ViewController.swift
+experiment/code/praise-draw test/praise-draw test/Info.plist
+experiment/code/praise-draw test/praise-draw test/Base.lproj/Main.storyboard
+experiment/code/praise-draw test/praise-draw test/Base.lproj/LaunchScreen.storyboard
+experiment/code/praise-draw test/praise-draw test/Assets.xcassets/AppIcon.appiconset/Contents.json
+experiment/code/praise-draw test/praise-draw test/AppDelegate.swift
+experiment/code/praise-draw test/praise-draw test.xcodeproj/xcuserdata/brialong.xcuserdatad/xcschemes/xcschememanagement.plist
+experiment/code/praise-draw test/praise-draw test.xcodeproj/project.xcworkspace/xcuserdata/brialong.xcuserdatad/UserInterfaceState.xcuserstate
+experiment/code/praise-draw test/praise-draw test.xcodeproj/project.xcworkspace/contents.xcworkspacedata
+experiment/code/praise-draw test/praise-draw test.xcodeproj/project.pbxproj
+experiment/.DS_Store
+.DS_Store

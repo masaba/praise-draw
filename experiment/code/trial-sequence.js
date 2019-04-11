@@ -17,7 +17,7 @@ var stimList = [];
 
 // current mode and session info
 var version ="Praisedraw" + "_pilot"; // set experiment name
-var sessionId=version + '_' Date.now().toString();
+var sessionId=version + '_' + Date.now().toString();
 
 // set which consent/thankspages we're using
 var consentPage = '#consentBing';
@@ -407,7 +407,7 @@ window.onload = function() {
         if ($("#CB").val().trim().length==0){
                 alert("Please let the researcher enter your condition.");
             }
-        else if($("#CB").val().trim()!>=0 && $("#CB").val().trim()!<=9){
+        else if(!($("#CB").val().trim()>=0 && $("#CB").val().trim()<=9)){
             alert("Please enter a valid counterbalancing condition (1-8)");
         }
         else{

@@ -79,7 +79,7 @@ button[disabled] {
 .startButton{
     width:15vw;
     height:auto;
-    margin-top:2vw;
+    margin-top:0vw;
 }
 
 .imageButton:hover{
@@ -96,7 +96,7 @@ button[disabled] {
 .drawingButton{
     font-family: Schoolbell,cursive;
     font-size: 3vw;
-    margin-top:3vh;
+    margin-top:1vh;
     text-align:center;
     cursor:pointer;
 }

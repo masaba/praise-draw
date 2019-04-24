@@ -195,9 +195,11 @@ function getStimuliList(){
     stimList.push(teacher2); //
     stimList.push(memory_check_2); // 
     stimList.push(distraction_1); // 
+    stimList.push(blank); //
     stimList.push(drawing_start_1); // 
     stimList.push(drawing_1); // 
     stimList.push(distraction_2); // 
+    stimList.push(blank); //
     stimList.push(drawing_start_2); // 
     stimList.push(drawing_2); //     
     stimList.push(distraction_3); // 
@@ -487,7 +489,7 @@ window.onload = function() {
         ctx=canvas.getContext("2d");
     //landscape mode 00 inne
     if (window.innerWidth > window.innerHeight){
-        canvas.height = window.innerHeight*.68; 
+        canvas.height = window.innerHeight*.80; 
         canvas.width = canvas.height;
     }
     // portrait mode -- resize to height
@@ -495,6 +497,9 @@ window.onload = function() {
         canvas.height = window.innerHeight*.68;
         canvas.width = canvas.height;
     }
+
+    canvas.style.height=window.innerHeight*.80
+    canvas.style.width=window.innerHeight*.80
 
     // set up the paper.js library on the sketchpad element
     paper.setup('sketchpad');

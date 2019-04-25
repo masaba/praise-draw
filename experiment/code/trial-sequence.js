@@ -22,7 +22,7 @@ var maxTrials;
 var stimList = [];
 
 // current mode and session info
-var version ="Praisedraw" + "_pilot"; // set experiment name
+var version ="Praisedraw" + "_pilot_2"; // set experiment name
 var sessionId=version + '_' + Date.now().toString();
 
 // set which consent/thankspages we're using
@@ -39,8 +39,8 @@ function getStimuliList(){
     // tracing trials
      var tryIt = {"exp_phase":"D","condition":"tryit","actor": "none","tracing_set":"none"}
 
-    var trace1 = {"exp_phase":"T","category":"this square", "image":"images/square.png"}
-    var trace2 = {"exp_phase":"T","category":"this shape","image":"images/shape.png"}
+    var trace1 = {"exp_phase":"T","condition":"tracing","category":"this square", "image":"images/square.png"}
+    var trace2 = {"exp_phase":"T","condition":"tracing","category":"this shape","image":"images/shape.png"}
 
     // difference combinations of overpraise v selective teacher videos
     var overpraise_karen_set1 = {"exp_phase":"V","condition":"overpraise","actor": "karen","tracing_set":"set1","video": "videos/overpraise_karen_set1.mp4"}

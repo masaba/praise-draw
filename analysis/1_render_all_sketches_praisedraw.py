@@ -22,27 +22,25 @@ exclude_ids = ['asdf']
 # set path to database connectinos 
 auth = pd.read_csv('auth.txt', header = None) 
 pswd = auth.values[0][0]
-user = 'sketchloop'
-host = 'rxdhawkins.me' ## cocolab ip address
 
 ## use pymongo for database
 import pymongo as pm
-conn = pm.MongoClient('mongodb://sketchloop:' + pswd + '@127.0.0.1')
+conn = pm.MongoClient('mongodb://stanford:' + pswd + '@127.0.0.1')
 db = conn['kiddraw']
-Praisedraw_pilot = db['Praisedraw_pilot']
+Praisedraw_pilot = db['Praisedraw_pilot_2']
 
 ###### ###### ###### TOGGLE HERE WHICH DATABSE
 this_collection = Praisedraw_pilot
-which_run = 'Praisedraw_pilot'
+which_run = 'Praisedraw_pilot_2'
 ###### ###### ###### ######
 
 ###### Where are we rendering these sketches?
 analysis_dir = os.getcwd()
-sketch_dir = os.path.join(analysis_dir,'sketches')
+sketch_dir = os.path.join(analysis_dir,'sketches_2')
 if not os.path.exists(sketch_dir):
     os.makedirs(sketch_dir)
 
-output_dir = os.path.join(analysis_dir,'sketches')
+output_dir = os.path.join(analysis_dir,'sketches_2')
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
@@ -51,7 +49,7 @@ if not os.path.exists(output_dir):
 session_id = []; trial_num = []; category = []; age = []; filename = []
 
 # stroke times and duration
-draw_duration_old = []; draw_duration_new = []
+draw_duration = [];
 
 # drawing usage stats
 num_strokes = []
@@ -119,7 +117,7 @@ for s in subIDS_to_render:
     ## if they made it past the try it trials
     if image_recs.count()>1: 
             for imrec in image_recs:                                                            
-                category_dir = os.path.join(sketch_dir,imrec['category'])
+                category_dir = os.path.join(sketch_dir,imrec['condition'])
                 if not os.path.exists(category_dir):
                     os.makedirs(category_dir)
                 # filename
@@ -131,6 +129,7 @@ for s in subIDS_to_render:
 
                 if stroke_recs.count()==0:
                     print('skipped image')
+
                 # don't do adults for now or blank images   
                 elif stroke_recs.count()>0:                               
                     countImage = countImage + 1;
@@ -170,8 +169,10 @@ for s in subIDS_to_render:
                         _svg_end_times.append(strec['endStrokeTime'])
                         _svg_start_times.append(strec['startStrokeTime'])
 
-                    ## draw duration (last stroke end - first stroke START)
-                    draw_duration.append((_svg_end_times[-1] - _svg_start_times[0])/1000) ## in seconds
+                    duration = (_svg_end_times[-1] - _svg_start_times[0])/1000
+                                        ## draw duration (last stroke end - first stroke START)
+                    draw_duration.append(duration) ## in seconds
+                    print('drawing duration = {}').format(duration)
 
                     ## get bounding box and mean pixel intensity
                     this_image = load_image_data(imrec['imgData'],imsize)
@@ -195,7 +196,7 @@ for s in subIDS_to_render:
                     if np.mod(writeImageCount,10)==0:
                         print('writing images!') # sanity check script is working
                         
-                    if np.mod(writeImageCount,100)==0:
+                    if np.mod(writeImageCount,10)==0:
                         time_now = time.time() 
                         time_spent_sec = (time_now - time_start)
                         time_spent = time_spent_sec/60
@@ -204,11 +205,11 @@ for s in subIDS_to_render:
                         ## write out csv every 1000 images
                         X_out = pd.DataFrame([session_id,trial_num,category,age,submit_time,submit_date,num_strokes,draw_duration,trial_duration, mean_intensity, bounding_box, filename, condition, CB, subID, image_name])
                         X_out = X_out.transpose()
-                        X_out.columns = ['session_id','trial_num','category','age','submit_time','submit_date','num_strokes','draw_duration','trial_duration','mean_intensity','bounding_box','filename','condition','CB','subID','image_name']
-                        X_out.to_csv(os.path.join(output_dir,'Photodraw2_AllDescriptives_{}_images_{}_start_{}.csv'.format(writeImageCount, which_run,alreadyWritten)))
+                        X_out.columns = ['session_id','trial_num','category','submit_time','submit_date','num_strokes','draw_duration','trial_duration','mean_intensity','bounding_box','filename','condition','CB','subID','image_name']
+                        X_out.to_csv(os.path.join(output_dir,'Praisedraw_AllDescriptives_{}_images_{}_start_{}.csv'.format(writeImageCount, which_run,alreadyWritten)))
 
 ## and at the very end, do this as well
-X_out = pd.DataFrame([session_id,trial_num,category,age,submit_time,submit_date,num_strokes,draw_duration_old,draw_duration_new,trial_duration, mean_intensity, bounding_box, filename,condition, CB, subID, image_name])
+X_out = pd.DataFrame([session_id,trial_num,category,submit_time,submit_date,num_strokes,draw_duration,trial_duration, mean_intensity, bounding_box, filename,condition, CB, subID, image_name])
 X_out = X_out.transpose()
-X_out.columns = ['session_id','trial_num','category','age','submit_time','submit_date','num_strokes','draw_duration_old','draw_duration_new','trial_duration','mean_intensity','bounding_box','filename','condition','CB','subID','image_name']
+X_out.columns = ['session_id','trial_num','category','submit_time','submit_date','num_strokes','draw_duration','trial_duration','mean_intensity','bounding_box','filename','condition','CB','subID','image_name']
 X_out.to_csv(os.path.join(output_dir,'Praisedraw_AllDescriptives_{}_images_final_{}.csv'.format(writeImageCount,which_run)))   

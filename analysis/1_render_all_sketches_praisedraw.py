@@ -17,7 +17,7 @@ import datetime
 import time
 
 # exclude IDs
-exclude_ids = ['asdf']
+exclude_ids = ['test','Test','']
 
 # set path to database connectinos 
 auth = pd.read_csv('auth.txt', header = None) 
@@ -36,11 +36,13 @@ which_run = 'Praisedraw_pilot_2'
 
 ###### Where are we rendering these sketches?
 analysis_dir = os.getcwd()
-sketch_dir = os.path.join(analysis_dir,'sketches_2')
+d = datetime.datetime.today()
+
+sketch_dir = os.path.join(analysis_dir, which_run + '_sketches_' + str(d.month) + '_' + str(d.day) + '_' + str(d.year))
 if not os.path.exists(sketch_dir):
     os.makedirs(sketch_dir)
 
-output_dir = os.path.join(analysis_dir,'sketches_2')
+output_dir = os.path.join(analysis_dir, which_run + '_descriptives_' + str(d.month) + '_'  + str(d.day) + '_' + str(d.year))
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
@@ -203,10 +205,10 @@ for s in subIDS_to_render:
                         print('Weve written {} images at in {} minutes '.format(writeImageCount, time_spent))
 
                         ## write out csv every 1000 images
-                        X_out = pd.DataFrame([session_id,trial_num,category,age,submit_time,submit_date,num_strokes,draw_duration,trial_duration, mean_intensity, bounding_box, filename, condition, CB, subID, image_name])
-                        X_out = X_out.transpose()
-                        X_out.columns = ['session_id','trial_num','category','submit_time','submit_date','num_strokes','draw_duration','trial_duration','mean_intensity','bounding_box','filename','condition','CB','subID','image_name']
-                        X_out.to_csv(os.path.join(output_dir,'Praisedraw_AllDescriptives_{}_images_{}_start_{}.csv'.format(writeImageCount, which_run,alreadyWritten)))
+                        # X_out = pd.DataFrame([session_id,trial_num,category,submit_time,submit_date,num_strokes,draw_duration,trial_duration, mean_intensity, bounding_box, filename, condition, CB, subID, image_name])
+                        # X_out = X_out.transpose()
+                        # X_out.columns = ['session_id','trial_num','category','submit_time','submit_date','num_strokes','draw_duration','trial_duration','mean_intensity','bounding_box','filename','condition','CB','subID','image_name']
+                        # X_out.to_csv(os.path.join(output_dir,'Praisedraw_AllDescriptives_{}_images_{}_start_{}.csv'.format(writeImageCount, which_run,alreadyWritten)))
 
 ## and at the very end, do this as well
 X_out = pd.DataFrame([session_id,trial_num,category,submit_time,submit_date,num_strokes,draw_duration,trial_duration, mean_intensity, bounding_box, filename,condition, CB, subID, image_name])

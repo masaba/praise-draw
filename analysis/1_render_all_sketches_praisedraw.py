@@ -29,7 +29,7 @@ conn = pm.MongoClient('mongodb://stanford:' + pswd + '@127.0.0.1')
 db = conn['kiddraw']
 Praisedraw_pilot = db['Praisedraw_pilot_2']
 
-###### ###### ###### TOGGLE HERE WHICH DATABSE
+###### ###### ###### TOGGLE HERE WHICH DATABASE
 this_collection = Praisedraw_pilot
 which_run = 'Praisedraw_pilot_2'
 ###### ###### ###### ######
@@ -48,7 +48,7 @@ if not os.path.exists(output_dir):
 
 ###### Open up variables for CSV writing
 # basic descriptors
-session_id = []; trial_num = []; category = []; age = []; filename = []
+session_id = []; trial_num = []; category = []; filename = []
 
 # stroke times and duration
 draw_duration = [];
@@ -64,7 +64,6 @@ start_time = []; submit_time = []; trial_duration = []
 # other timing variables
 submit_date = []; submit_date_readable=[]
 
-# photodraw2 specific
 image_name = [] #imageName
 condition = [] #condition
 subID = [] #subID
@@ -132,7 +131,7 @@ for s in subIDS_to_render:
                 if stroke_recs.count()==0:
                     print('skipped image')
 
-                # don't do adults for now or blank images   
+                # don't do blank images   
                 elif stroke_recs.count()>0:                               
                     countImage = countImage + 1;
                     ## Append session ID, trial Num, category, age                            
@@ -141,22 +140,14 @@ for s in subIDS_to_render:
                     category.append(imrec['category'])
                     filename.append(fname) # defined
 
-                    ## photodraw2 specific variables
-                    try:
-                        image_name.append(imrec['imageName'])
-                    except:
-                        image_name.append(imrec['category'])
-                        # print 'subbed category for imagename for category {}'.format(imrec['category'])
-
                     CB.append(imrec['CB']) # which counterbalancing
                     subID.append(imrec['subID']) #unique identifier
-                    condition.append(imrec['condition']) #semantic or perception
+                    condition.append(imrec['condition']) 
 
-                    ## again, regularize based on timing info change
                     start_time.append(imrec['startTrialTime'])
                     submit_time.append(imrec['endTrialTime'])
                     trial_duration.append((imrec['endTrialTime'] - imrec['startTrialTime'])/1000.00)
-                    readadble_date = datetime.datetime.fromtimestamp(imrec['endTrialTime']/1000.0).strftime('%Y-%m-%d %H:%M:%S.%f')
+                    readable_date = datetime.datetime.fromtimestamp(imrec['endTrialTime']/1000.0).strftime('%Y-%m-%d %H:%M:%S.%f')
 
                     ## readable date (not just time, has other info for sanity cecks)
                     submit_date_readable.append(readadble_date)
@@ -192,9 +183,10 @@ for s in subIDS_to_render:
                     imgData = imrec['imgData'];
                     writeImageCount = writeImageCount+1
 
+                    #Write image
                     with open(fname, "wb") as fh:
                         fh.write(imgData.decode('base64')) 
-                         
+                    
                     if np.mod(writeImageCount,10)==0:
                         print('writing images!') # sanity check script is working
                         
@@ -211,6 +203,9 @@ for s in subIDS_to_render:
                         # X_out.to_csv(os.path.join(output_dir,'Praisedraw_AllDescriptives_{}_images_{}_start_{}.csv'.format(writeImageCount, which_run,alreadyWritten)))
 
 ## and at the very end, do this as well
+## pd = pandas
+## making a dataframe w/ all these variables, transpose into columns
+## 
 X_out = pd.DataFrame([session_id,trial_num,category,submit_time,submit_date,num_strokes,draw_duration,trial_duration, mean_intensity, bounding_box, filename,condition, CB, subID, image_name])
 X_out = X_out.transpose()
 X_out.columns = ['session_id','trial_num','category','submit_time','submit_date','num_strokes','draw_duration','trial_duration','mean_intensity','bounding_box','filename','condition','CB','subID','image_name']

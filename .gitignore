@@ -1,3 +1,4 @@
+*.png
 auth.txt
 auth.json
 analysis/auth.txt
@@ -8,4 +9,5 @@ experiment/code/.DS_Store
 experiment/.DS_Store
 .DS_Store
 experiment/.DS_Store
+.DS_Store
 .DS_Store

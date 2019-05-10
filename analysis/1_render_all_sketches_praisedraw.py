@@ -22,18 +22,16 @@ exclude_ids = ['asdf']
 # set path to database connectinos 
 auth = pd.read_csv('auth.txt', header = None) 
 pswd = auth.values[0][0]
-user = 'sketchloop'
-host = 'rxdhawkins.me' ## cocolab ip address
 
 ## use pymongo for database
 import pymongo as pm
-conn = pm.MongoClient('mongodb://sketchloop:' + pswd + '@127.0.0.1')
+conn = pm.MongoClient('mongodb://stanford:' + pswd + '@127.0.0.1')
 db = conn['kiddraw']
-Praisedraw_pilot = db['Praisedraw_pilot']
+Praisedraw_pilot = db['Praisedraw_pilot_2']
 
 ###### ###### ###### TOGGLE HERE WHICH DATABSE
 this_collection = Praisedraw_pilot
-which_run = 'Praisedraw_pilot'
+which_run = 'Praisedraw_pilot_2'
 ###### ###### ###### ######
 
 ###### Where are we rendering these sketches?

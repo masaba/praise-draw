@@ -150,7 +150,7 @@ for s in subIDS_to_render:
                     readable_date = datetime.datetime.fromtimestamp(imrec['endTrialTime']/1000.0).strftime('%Y-%m-%d %H:%M:%S.%f')
 
                     ## readable date (not just time, has other info for sanity cecks)
-                    submit_date_readable.append(readadble_date)
+                    submit_date_readable.append(readable_date)
                     submit_date.append(imrec['date'])
 
                     ## Count number of strokes and timing information as well on stroke basis

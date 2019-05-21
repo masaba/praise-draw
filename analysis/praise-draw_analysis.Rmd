@@ -1,0 +1,178 @@
+---
+title: "praise-draw analysis"
+author: "Mika Asaba"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    highlight: pygments
+    theme: flatly
+    toc: yes
+    toc_float: true
+  pdf_docume9nt:
+    toc: yes
+  word_document:
+    toc: yes
+---
+
+Libraries.
+```{r echo=FALSE, message=FALSE}
+rm(list=ls())
+
+knitr::opts_chunk$set(fig.width=8, fig.height=5, 
+                      echo=TRUE, warning=FALSE, message=FALSE, cache=TRUE)
+
+library(psych)
+library(langcog)
+library(tidyverse)
+library(ggthemes)
+library(lme4)
+library(lmerTest)
+library(readxl)
+library(here)
+library(janitor)
+```
+
+Counterbalancing info.
+1: sp_karen_1, op_linda_2 (selective video first, karen is actress, drawing set 1) 
+2: sp_karen_2, op_linda_1
+3: sp_linda_1, op_karen_2
+4: sp_linda_2, op_karen_1
+5: op_karen_1, sp_linda_2
+6: op_karen_2, sp_linda_1
+7: op_linda_1, sp_karen_2
+8: op_linda_2, sp_karen_1
+
+#Pilot
+
+Read in file.
+```{r, message=FALSE}
+p.raw = read_csv("Praisedraw_pilot_2_descriptives_5_20_2019/Praisedraw_AllDescriptives_70_images_final_Praisedraw_pilot_2.csv")
+
+#read in demographics and other coded data
+d = read_xlsx("praise-draw_data.xlsx")
+```
+
+Combine and clean.
+```{r}
+all.raw = full_join(p.raw, d)
+
+all.data = all.raw %>%
+  select(-session_id, -trial_num, -category, -submit_time, -submit_date, -bounding_box, -filename, -image_name, -count, -date_tested, -bing_ID, -location, -experimenter, -redcap) %>%
+  filter(condition == "selective" | condition == "overpraise") %>%
+     #    selective_prompt == "anything", overpraise_prompt == "anything") %>%
+  mutate(order = ifelse(CB <= 4, "selective_overpraise", "overpraise_selective"),
+         age_bin = ifelse(age <5, "4","5"),
+         effort_chose_selective = explicit_effort == selective_teacher,
+         pref_chose_selective = teacher_pref == selective_teacher) %>%
+  rename(id = subID)
+
+d.data = d %>%
+  rename(id = subID) %>%
+    mutate(order = ifelse(CB <= 4, "selective_overpraise", "overpraise_selective"),
+         age_bin = ifelse(age <5, "4","5"),
+         effort_chose_selective = explicit_effort == selective_teacher,
+         pref_chose_selective = teacher_pref == selective_teacher)
+```
+
+###Demographics
+```{r}
+dems = all.data %>%
+  summarize(n=n()/2,
+            mean_age = mean(age),
+            min_age = min(age),
+            max_age = max(age))
+dems
+
+table(all.data$age_bin)
+```
+
+
+### Tables
+```{r}
+means.table = all.data %>%
+  group_by(condition, age_bin) %>%
+  summarize(m_strokes = mean(num_strokes),
+            m_draw_time = mean(draw_duration),
+            m_total_time = mean(trial_duration),
+            m_intensity = mean(mean_intensity))
+
+means.table
+```
+
+### Initial Plots
+Number of strokes.
+```{r}
+ggplot(all.data, aes(x=condition, y=num_strokes)) +
+    geom_line(aes(group = id, color=id), size = 0.5) + 
+   # geom_jitter(width = .1, height =.1,size = 2)+
+  geom_point() +
+  theme_few() +
+  facet_grid(~ age_bin)
+
+ggplot(means.table, aes(x=condition, y=m_strokes, col=condition)) +
+  geom_point(size=3) +
+  geom_jitter(data=all.data, aes(x =condition, y =num_strokes, col=condition),width=.1, height=.1,size=.2) +
+  theme_few() +
+  ylab("mean number of strokes") +
+  facet_grid(~ age_bin)
+```
+
+Draw duration.
+```{r}
+ggplot(all.data, aes(x=condition, y=draw_duration)) +
+    geom_line(aes(group = id, color=id), size = 0.5) + 
+    geom_jitter(width = .1, height =.1,size = 2) +
+    facet_grid(~ age_bin) +
+    theme_few()
+
+ggplot(means.table, aes(x=condition, y=m_draw_time, col=condition)) +
+  geom_point(size=3) +
+  geom_jitter(data=p.data, aes(x =condition, y =draw_duration),width=.1, height=.1,size=.2) +
+  theme_few() +
+  ylab("mean time drawing") +
+  facet_grid(~ age_bin)
+```
+
+Trial duration.
+```{r}
+ggplot(p.data, aes(x=condition, y=trial_duration)) +
+    geom_line(aes(group = subID, color=subID), size = 0.5) + 
+    geom_jitter(width = .1, height =.1,size = 2)
+
+ggplot(means.table, aes(x=condition, y=m_total_time, col=condition)) +
+  geom_point(size=3) +
+  geom_jitter(data=p.data, aes(x =condition, y =trial_duration),width=.1, height=.1,size=.2) +
+  theme_few() +
+  ylab("mean total time")
+```
+
+Amount of ink (intensity).
+```{r}
+ggplot(p.data, aes(x=condition, y=mean_intensity)) +
+    geom_line(aes(group = subID, color=subID), size = 0.5) + 
+    geom_jitter(width = .01, height =.01,size = 2)
+
+ggplot(means.table, aes(x=condition, y=m_intensity, col=condition)) +
+  geom_point(size=3) +
+  geom_jitter(data=p.data, aes(x =condition, y =mean_intensity),width=.1, height=.1,size=.2) +
+  theme_few() +
+  ylab("mean intensity") +
+  facet_grid(~ age_bin)
+```
+
+### Analyses
+```{r}
+summary(lmer(num_strokes ~ condition *age_bin + order + (1|id), data=all.data))
+```
+
+### Explicit questions
+```{r}
+explicit.table = d.data %>%
+  group_by(age_bin) %>%
+  summarize(num_effort_chose_selective = sum(effort_chose_selective),
+            num_pref_chose_selective = sum(pref_chose_selective),
+            n=n())
+
+explicit.table
+
+```

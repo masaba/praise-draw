@@ -110,8 +110,8 @@ ggplot(all.data, aes(x=condition, y=num_strokes)) +
   facet_grid(~ age_bin)
 
 ggplot(means.table, aes(x=condition, y=m_strokes, col=condition)) +
-  geom_point(size=3) +
-  geom_jitter(data=all.data, aes(x =condition, y =num_strokes, col=condition),width=.1, height=.1,size=.2) +
+  geom_point(size=5) +
+  geom_jitter(data=all.data, aes(x =condition, y =num_strokes, col=condition),width=.1, height=.1,size=1) +
   theme_few() +
   ylab("mean number of strokes") +
   facet_grid(~ age_bin)
@@ -127,7 +127,7 @@ ggplot(all.data, aes(x=condition, y=draw_duration)) +
 
 ggplot(means.table, aes(x=condition, y=m_draw_time, col=condition)) +
   geom_point(size=3) +
-  geom_jitter(data=p.data, aes(x =condition, y =draw_duration),width=.1, height=.1,size=.2) +
+  geom_jitter(data=all.data, aes(x =condition, y =draw_duration),width=.1, height=.1,size=.2) +
   theme_few() +
   ylab("mean time drawing") +
   facet_grid(~ age_bin)
@@ -135,26 +135,29 @@ ggplot(means.table, aes(x=condition, y=m_draw_time, col=condition)) +
 
 Trial duration.
 ```{r}
-ggplot(p.data, aes(x=condition, y=trial_duration)) +
-    geom_line(aes(group = subID, color=subID), size = 0.5) + 
-    geom_jitter(width = .1, height =.1,size = 2)
+ggplot(all.data, aes(x=condition, y=trial_duration)) +
+    geom_line(aes(group = id, color=id), size = 0.5) + 
+    geom_jitter(width = .1, height =.1,size = 2) +
+    facet_grid(~ age_bin)
 
 ggplot(means.table, aes(x=condition, y=m_total_time, col=condition)) +
   geom_point(size=3) +
-  geom_jitter(data=p.data, aes(x =condition, y =trial_duration),width=.1, height=.1,size=.2) +
+  geom_jitter(data=all.data, aes(x =condition, y =trial_duration),width=.1, height=.1,size=.2) +
   theme_few() +
-  ylab("mean total time")
+  ylab("mean total time") +
+  facet_grid(~ age_bin)
 ```
 
 Amount of ink (intensity).
 ```{r}
-ggplot(p.data, aes(x=condition, y=mean_intensity)) +
-    geom_line(aes(group = subID, color=subID), size = 0.5) + 
-    geom_jitter(width = .01, height =.01,size = 2)
+ggplot(all.data, aes(x=condition, y=mean_intensity)) +
+    geom_line(aes(group = id, color=id), size = 0.5) + 
+    geom_jitter(width = .01, height =.01,size = 2) +
+  facet_grid(~ age_bin)
 
 ggplot(means.table, aes(x=condition, y=m_intensity, col=condition)) +
   geom_point(size=3) +
-  geom_jitter(data=p.data, aes(x =condition, y =mean_intensity),width=.1, height=.1,size=.2) +
+  geom_jitter(data=all.data, aes(x =condition, y =mean_intensity),width=.1, height=.1,size=.2) +
   theme_few() +
   ylab("mean intensity") +
   facet_grid(~ age_bin)
@@ -162,7 +165,9 @@ ggplot(means.table, aes(x=condition, y=m_intensity, col=condition)) +
 
 ### Analyses
 ```{r}
-summary(lmer(num_strokes ~ condition *age_bin + order + (1|id), data=all.data))
+summary(lmer(num_strokes ~ condition * age + order + (1|id), data=all.data))
+summary(lmer(draw_duration ~ condition * age + order + (1|id), data=all.data))
+summary(lmer(mean_intensity ~ condition * age + order + (1|id), data=all.data))
 ```
 
 ### Explicit questions

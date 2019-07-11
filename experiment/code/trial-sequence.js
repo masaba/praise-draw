@@ -250,7 +250,9 @@ function showTrial(){
         $("#sketchpad").show();
         $("#keepGoing").show()
         $("#videoRedo").hide()
-        $("#drawingRedo").show()
+        if (curTrial>0){ // not on first tryit trial
+            $("#drawingRedo").show()
+        }
         setUpDrawing()
         console.log('starting drawing trial')
     }

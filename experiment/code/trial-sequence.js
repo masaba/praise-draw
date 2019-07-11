@@ -505,7 +505,7 @@ window.onload = function() {
         ctx=canvas.getContext("2d");
     //landscape mode 00 inne
     if (window.innerWidth > window.innerHeight){
-        canvas.height = window.innerHeight*.80; 
+        canvas.height = window.innerHeight*.75; 
         canvas.width = canvas.height;
     }
     // portrait mode -- resize to height
@@ -514,8 +514,8 @@ window.onload = function() {
         canvas.width = canvas.height;
     }
 
-    canvas.style.height=window.innerHeight*.80
-    canvas.style.width=window.innerHeight*.80
+    canvas.style.height=window.innerHeight*.75
+    canvas.style.width=window.innerHeight*.75
 
     // set up the paper.js library on the sketchpad element
     paper.setup('sketchpad');

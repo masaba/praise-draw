@@ -2,10 +2,7 @@
 
 Handles dynamic elements of praise-draw experiment with tracing/drawing elements
 March 2019, Bria Long, brialorelle@gmail.com
-
-Back button for two teacher videos for only the first time on memory check trials; back button should replay video
- General sizing/placement of elements wrt to the actual ipad size
-
+Updated July 2019.
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
 
 
@@ -15,6 +12,7 @@ socket = io.connect(); // for data sending
 
 // Set global variables
 var curTrial=0 // global variable, trial counter
+var redo_count=0 // global variable, redo count that resets after each trial
 var disableDrawing = false; //whether touch drawing is disabled or not
 var strokeThresh = 3; // each stroke needs to be at least this many pixels long to be sent
 // just open up these global variables
@@ -22,7 +20,7 @@ var maxTrials;
 var stimList = [];
 
 // current mode and session info
-var version ="Praisedraw" + "_pilot_2"; // set experiment name
+var version ="Praisedraw" + "_pilot_4"; // set experiment name
 var sessionId=version + '_' + Date.now().toString();
 
 // set which consent/thankspages we're using
@@ -37,7 +35,7 @@ function getStimuliList(){
 
     // exp_phase variable types: T: tracing / warm up phase, V: video, D: drawing, M: memory_test
     // tracing trials
-     var tryIt = {"exp_phase":"D","condition":"tryit","actor": "none","tracing_set":"none"}
+    var tryIt = {"exp_phase":"D","condition":"tryit","actor": "none","tracing_set":"none"}
 
     var trace1 = {"exp_phase":"T","condition":"tracing","category":"this square", "image":"images/square.png"}
     var trace2 = {"exp_phase":"T","condition":"tracing","category":"this shape","image":"images/shape.png"}
@@ -86,9 +84,9 @@ function getStimuliList(){
     var drawing_start_karen = {"exp_phase":"V","actor": "karen","video": "videos/karen_test.mp4"}
 
     // distraction video
-    var distraction_1 = {"exp_phase":"V","video": "videos/distractor_1.mp4", "actor": "none"} // 
-    var distraction_2 = {"exp_phase":"V","video": "videos/distractor_2.mp4","actor": "none"} // 
-    var distraction_3 = {"exp_phase":"V","video": "videos/distractor_3.mp4","actor": "none"} // 
+    var distraction_1 = {"exp_phase":"V","video": "videos/short_distractor_1.mp4", "actor": "none"} // 
+    var distraction_2 = {"exp_phase":"V","video": "videos/short_distractor_2.mp4","actor": "none"} // 
+    var distraction_3 = {"exp_phase":"V","video": "videos/short_distractor_3.mp4","actor": "none"} // 
 
     var blank = {"exp_phase":"M","condition":"none","actor": "none","tracing_set":"none","image": "test_images/blankimage.png"}
 
@@ -186,9 +184,10 @@ function getStimuliList(){
 
     }
 
-    stimList.push(tryIt);
+    stimList.push(tryIt); // initial usage
     stimList.push(trace1); 
     stimList.push(trace2); // 
+    stimList.push(tryIt); // NEED REDO BUTTON
     stimList.push(blank);
     stimList.push(teacher1); // 
     stimList.push(memory_check_1); //
@@ -197,11 +196,11 @@ function getStimuliList(){
     stimList.push(distraction_1); // 
     stimList.push(blank); //
     stimList.push(drawing_start_1); // 
-    stimList.push(drawing_1); // 
+    stimList.push(drawing_1); //   NEED REDO BUTTON    
     stimList.push(distraction_2); // 
     stimList.push(blank); //
     stimList.push(drawing_start_2); // 
-    stimList.push(drawing_2); //     
+    stimList.push(drawing_2); //  NEED REDO BUTTON   
     stimList.push(distraction_3); // 
 
     maxTrials = stimList.length
@@ -230,6 +229,7 @@ function showTrial(){
     if (stimList[curTrial].exp_phase == 'T'){
         setUpDrawing()
         console.log('starting tracing trial')
+        $("#drawingRedo").hide() // can't redo tracing trial
     }
     // video only
     else if (stimList[curTrial].exp_phase == 'V'){
@@ -238,6 +238,7 @@ function showTrial(){
         $("#sketchpad").hide()
         $("#keepGoing").hide()
         $("#videoRedo").hide()
+        $("#drawingRedo").hide()
         // play video 500ms second later to account for loading time
         player = loadNextVideo()
         setTimeout(function() {playVideo(player);},500);
@@ -249,6 +250,9 @@ function showTrial(){
         $("#sketchpad").show();
         $("#keepGoing").show()
         $("#videoRedo").hide()
+        if (curTrial>0){ // not on first tryit trial
+            $("#drawingRedo").show()
+        }
         setUpDrawing()
         console.log('starting drawing trial')
     }
@@ -256,6 +260,7 @@ function showTrial(){
         if (stimList[curTrial].actor != "none"){
             $("#videoRedo").show()
         }
+        $("#drawingRedo").hide() // 
         $("#keepGoing").show()
         $("#sketchpad").hide(); // hide the sketchpad
         $('#testImageDiv').children('img').attr('src', stimList[curTrial].image); // change test image
@@ -271,6 +276,7 @@ function increaseTrial(){
         console.log('saving sketchpad data...')
     }
     curTrial=curTrial+1; // increase counter
+    redo_count=0; // set back to zero
     startTrial() // start next trial
 }
 
@@ -396,6 +402,7 @@ function saveSketchData(){
         actor: actor, // which actor they saw (if in drawing trial)
         tracing_set, tracing_set, // which set of tracings they saw (if in drawing trial)
         CB: CB, // counterbalancing
+        redo_count: redo_count,
         subID: subID, // entered by experimenter at beginning
         date: readable_date, // today's date
         dbname:'kiddraw', // still in kiddraw database
@@ -475,11 +482,20 @@ window.onload = function() {
         restartExperiment()
     });
 
-    // restart experiment at end
+    // video starting just resets trial counter
     $('#videoRedo').bind('touchstart mousedown',function(e) {
         e.preventDefault()
         curTrial = curTrial - 1
         showTrial();
+    });
+
+     // restart experiment at end
+    $('#drawingRedo').bind('touchstart mousedown',function(e) {
+        e.preventDefault()
+        redo_count = redo_count + 1
+        saveSketchData() // save the sketch data
+        console.log('redoing drawing for this trial')
+        project.activeLayer.removeChildren(); // and clear sketchpad     
     });
 
 
@@ -489,7 +505,7 @@ window.onload = function() {
         ctx=canvas.getContext("2d");
     //landscape mode 00 inne
     if (window.innerWidth > window.innerHeight){
-        canvas.height = window.innerHeight*.80; 
+        canvas.height = window.innerHeight*.75; 
         canvas.width = canvas.height;
     }
     // portrait mode -- resize to height
@@ -498,8 +514,8 @@ window.onload = function() {
         canvas.width = canvas.height;
     }
 
-    canvas.style.height=window.innerHeight*.80
-    canvas.style.width=window.innerHeight*.80
+    canvas.style.height=window.innerHeight*.75
+    canvas.style.width=window.innerHeight*.75
 
     // set up the paper.js library on the sketchpad element
     paper.setup('sketchpad');
@@ -545,6 +561,7 @@ window.onload = function() {
             actor: actor, // which actor they saw (if in drawing trial)
             tracing_set, tracing_set, // which set of tracings they saw (if in drawing trial)
             CB: CB, // counterbalancing
+            redo_count: redo_count,
             subID: subID, // entered by experimenter at beginning
             date: readable_date, // today's date
             dbname:'kiddraw', // still in kiddraw database

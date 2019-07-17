@@ -106,6 +106,22 @@ button[disabled] {
     height:auto;
 }
 
+
+.redoButton{
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-family: Schoolbell,cursive;
+    font-size: 3vw;
+    text-align:center;
+    cursor:pointer;
+}
+
+.redoButton>img{
+    width:12vw;
+    height:auto;
+}
+
 #consent {
     text-align: left;
     height: 420px;
@@ -159,6 +175,7 @@ button[disabled] {
     /*left: 2.5%;*/
     border: solid 5px #999;
     display: block;
+    float: center;
     margin-left: auto;
     margin-right: auto;
     margin-top: 2vh;
@@ -288,6 +305,10 @@ button[disabled] {
 }
 
 
+#container{
+    width:100%;
+}
+
 #checkConsent {
     /*position: absolute;*/
     background: #ffffff;
@@ -307,7 +328,7 @@ button[disabled] {
 
 #mainExp {
     position:absolute;
-    height: 100%;
+    height: 95%;
     width: 100%;
 }
 

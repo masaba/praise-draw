@@ -46,7 +46,7 @@ Counterbalancing info.
 
 Read in file.
 ```{r, message=FALSE}
-p.raw = read_csv("Praisedraw_pilot_2_descriptives_5_20_2019/Praisedraw_AllDescriptives_70_images_final_Praisedraw_pilot_2.csv")
+p.raw = read_csv("Praisedraw_pilot_2_descriptives_5_25_2019/Praisedraw_AllDescriptives_100_images_final_Praisedraw_pilot_2.csv")
 
 #read in demographics and other coded data
 d = read_xlsx("praise-draw_data.xlsx")
@@ -59,19 +59,16 @@ all.raw = full_join(p.raw, d)
 all.data = all.raw %>%
   select(-session_id, -trial_num, -category, -submit_time, -submit_date, -bounding_box, -filename, -image_name, -count, -date_tested, -bing_ID, -location, -experimenter, -redcap) %>%
   filter(condition == "selective" | condition == "overpraise") %>%
-     #    selective_prompt == "anything", overpraise_prompt == "anything") %>%
+      #   selective_prompt == "anything", overpraise_prompt == "anything") %>%
   mutate(order = ifelse(CB <= 4, "selective_overpraise", "overpraise_selective"),
          age_bin = ifelse(age <5, "4","5"),
          effort_chose_selective = explicit_effort == selective_teacher,
          pref_chose_selective = teacher_pref == selective_teacher) %>%
   rename(id = subID)
 
-d.data = d %>%
-  rename(id = subID) %>%
-    mutate(order = ifelse(CB <= 4, "selective_overpraise", "overpraise_selective"),
-         age_bin = ifelse(age <5, "4","5"),
-         effort_chose_selective = explicit_effort == selective_teacher,
-         pref_chose_selective = teacher_pref == selective_teacher)
+d.data.4 = filter(all.data, age_bin == "4")
+
+d.data.5 = filter(all.data, age_bin == "5")
 ```
 
 ###Demographics
@@ -91,7 +88,8 @@ table(all.data$age_bin)
 ```{r}
 means.table = all.data %>%
   group_by(condition, age_bin) %>%
-  summarize(m_strokes = mean(num_strokes),
+  summarize(n=n(),
+            m_strokes = mean(num_strokes),
             m_draw_time = mean(draw_duration),
             m_total_time = mean(trial_duration),
             m_intensity = mean(mean_intensity))
@@ -168,6 +166,8 @@ ggplot(means.table, aes(x=condition, y=m_intensity, col=condition)) +
 summary(lmer(num_strokes ~ condition * age + order + (1|id), data=all.data))
 summary(lmer(draw_duration ~ condition * age + order + (1|id), data=all.data))
 summary(lmer(mean_intensity ~ condition * age + order + (1|id), data=all.data))
+
+t.test(num_strokes ~ condition, all.data, paired=TRUE)
 ```
 
 ### Explicit questions

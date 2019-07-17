@@ -20,7 +20,7 @@ var maxTrials;
 var stimList = [];
 
 // current mode and session info
-var version ="Praisedraw" + "_pilot_4"; // set experiment name
+var version ="Praisedraw" + "_pilot_5"; // set experiment name
 var sessionId=version + '_' + Date.now().toString();
 
 // set which consent/thankspages we're using

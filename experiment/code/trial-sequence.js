@@ -193,15 +193,15 @@ function getStimuliList(){
     stimList.push(memory_check_1); //
     stimList.push(teacher2); //
     stimList.push(memory_check_2); // 
-    stimList.push(distraction_1); // 
+    // stimList.push(distraction_1); // 
     stimList.push(blank); //
     stimList.push(drawing_start_1); // 
     stimList.push(drawing_1); //   NEED REDO BUTTON    
-    stimList.push(distraction_2); // 
+    // stimList.push(distraction_2); // 
     stimList.push(blank); //
     stimList.push(drawing_start_2); // 
     stimList.push(drawing_2); //  NEED REDO BUTTON   
-    stimList.push(distraction_3); // 
+    // stimList.push(distraction_3); // 
 
     maxTrials = stimList.length
 }
@@ -418,6 +418,7 @@ function saveSketchData(){
 // to end & restart experiment
 function endExperiment(){
     $('#keepGoing').hide();
+    $("#drawingRedo").hide()
     $('#sketchpad').hide();
     $(thanksPage).show();
     curTrial = -1;

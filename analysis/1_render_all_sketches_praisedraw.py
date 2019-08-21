@@ -27,11 +27,11 @@ pswd = auth.values[0][0]
 import pymongo as pm
 conn = pm.MongoClient('mongodb://stanford:' + pswd + '@127.0.0.1')
 db = conn['kiddraw']
-Praisedraw_pilot = db['Praisedraw_pilot_3']
+Praisedraw_pilot = db['Praisedraw_pilot_5']
 
 ###### ###### ###### TOGGLE HERE WHICH DATABASE
 this_collection = Praisedraw_pilot
-which_run = 'Praisedraw_pilot_3'
+which_run = 'Praisedraw_pilot_5'
 ###### ###### ###### ######
 
 ###### Where are we rendering these sketches?

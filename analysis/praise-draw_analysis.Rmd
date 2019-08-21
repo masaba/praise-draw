@@ -42,8 +42,7 @@ Counterbalancing info.
 7: op_linda_1, sp_karen_2
 8: op_linda_2, sp_karen_1
 
-#Pilot
-
+##Pilot 1
 Read in file.
 ```{r, message=FALSE}
 p.raw = read_csv("Praisedraw_pilot_2_descriptives_5_25_2019/Praisedraw_AllDescriptives_100_images_final_Praisedraw_pilot_2.csv")
@@ -71,7 +70,7 @@ d.data.4 = filter(all.data, age_bin == "4")
 d.data.5 = filter(all.data, age_bin == "5")
 ```
 
-###Demographics
+Demographics
 ```{r}
 dems = all.data %>%
   summarize(n=n()/2,
@@ -177,6 +176,427 @@ explicit.table = d.data %>%
   summarize(num_effort_chose_selective = sum(effort_chose_selective),
             num_pref_chose_selective = sum(pref_chose_selective),
             n=n())
+
+explicit.table
+
+```
+
+##Pilot 2
+Read in file.
+```{r, message=FALSE}
+p2.raw = read_csv("Praisedraw_pilot_3_descriptives_7_17_2019/descriptives_merged_pilot_3_4.csv")
+
+#read in demographics and other coded data
+d = read_xlsx("praise-draw_data.xlsx",sheet=2)
+```
+
+Combine and clean.
+```{r}
+all.raw = full_join(p2.raw,d) # change this later to combine w/ demographics data sheet
+
+all.data = all.raw %>%
+  select(-session_id, 
+         -trial_num, 
+         -category, -submit_time, -submit_date, -bounding_box, -filename, -image_name,
+         -count, 
+         -date_tested, 
+         -bing_ID, 
+         -location, 
+         -experimenter, 
+         -redcap) %>%
+  filter(condition == "tryit" | condition == "selective" | condition == "overpraise",
+         subID != "PD2_190715_04") %>% #didn't do selective teacher drawing
+      #   selective_prompt == "anything", overpraise_prompt == "anything") %>%
+  mutate(order = ifelse(CB <= 4, "selective_overpraise", "overpraise_selective"),
+         age_bin = ifelse(age <5, "4","5"),
+         effort_chose_selective = explicit_effort == selective_teacher,
+         pref_chose_selective = teacher_pref == selective_teacher) %>%
+  rename(id = subID)
+```
+
+### Tables
+Table with counts for # of drawings for each teacher.
+```{r}
+id.table = all.data %>%
+  group_by(age_bin,order,id) %>%
+  summarise(#n_try = sum(condition == "tryit"),
+            sp=sum(condition == "selective"),
+            op = sum(condition =="overpraise"))
+
+id.table
+
+id.tidy = id.table %>%
+  gather(teacher, practices, sp, op)
+
+```
+
+### Initial Plots
+```{r}
+ggplot(id.tidy, aes(x=teacher, y=practices)) +
+    geom_line(aes(group = id, color=id), size = 0.5) + 
+   # geom_jitter(width = .1, height =.1,size = 2)+
+  geom_point() +
+  theme_few() +
+  facet_grid(order ~ id)
+```
+
+### Explicit questions
+```{r}
+explicit.table = all.data %>%
+  group_by(id) %>%
+  summarize(num_effort_chose_selective = sum(effort_chose_selective),
+            num_pref_chose_selective = sum(pref_chose_selective),
+            n=n())
+
+explicit.table
+
+```
+
+##Pilot 3
+Read in file.
+```{r, message=FALSE}
+p3.raw = read_csv("merged_summer_pilot.csv")
+
+#read in demographics and other coded data
+d = read_xlsx("praise-draw_data.xlsx",sheet=2)
+```
+
+Combine and clean.
+```{r}
+all.raw = full_join(p3.raw,d) # change this later to combine w/ demographics data sheet
+
+all.data = all.raw %>%
+  select(-session_id, 
+         -trial_num, 
+         -category, -submit_time, -submit_date, -bounding_box, -filename, -image_name,
+         -count, 
+         -date_tested, 
+         -bing_ID, 
+         -location, 
+         -experimenter, 
+         -redcap) %>%
+  filter(condition == "tryit" | condition == "selective" | condition == "overpraise",
+         subID != "PD2_190715_04",
+         subID != "PD_190712_03") %>% #didn't do selective teacher drawing
+      #   selective_prompt == "anything", overpraise_prompt == "anything") %>%
+  mutate(order = ifelse(CB <= 4, "selective_overpraise", "overpraise_selective"),
+         effort_chose_selective = explicit_effort == selective_teacher,
+         pref_chose_selective = teacher_pref == selective_teacher) %>%
+  rename(id = subID)
+```
+
+### Tables
+Table with counts for # of drawings for each teacher.
+```{r}
+id.table = all.data %>%
+  group_by(age, age_bin,order,id) %>%
+  summarise(sp=sum(condition == "selective"),
+            op = sum(condition =="overpraise"),
+            diff = sp-op) %>%
+  mutate(more = ifelse(diff > 0, "sp",ifelse(diff == 0, "same", ifelse(diff < 0, "op",""))))
+
+id.table
+
+id.counts = id.table %>%
+  group_by(age_bin) %>%
+  summarise(n_sp = sum(more == "sp"),
+            n_op = sum(more == "op"),
+            same = sum(more == "same"))
+
+id.counts
+
+id.counts2 = id.counts %>%
+  gather(type, count, n_sp, n_op, same) %>%
+  mutate(type = factor(type, levels=c("n_sp","n_op","same"), labels=c("More for Selective", "More for Overpraise","Same for each")))
+
+ggplot(id.counts2, aes(x=type, y=count,fill=type)) +
+  geom_bar(stat="identity") +
+  xlab("") +
+  theme_few() +
+  guides(fill=FALSE) +
+  facet_grid(~ age_bin) +
+  scale_y_continuous(breaks=c(0,2,4,6,8,10,12))
+
+id.means = id.table %>%
+  gather(teacher, practices, sp, op) %>%
+  group_by(teacher) %>%
+  summarize(n=n(),
+            m_practices = mean(practices))
+
+id.means
+
+id.tidy = id.table %>%
+  gather(teacher, practices, sp, op)
+
+id.tidy
+
+ggplot() +
+  geom_point(data=id.means, aes(x=teacher, y=m_practices, col=teacher, size=4)) +
+#  ylim(0,4) +
+  geom_jitter(data=id.tidy, aes(x=teacher, y=practices), size=.5, width=.1, height=.1) +
+    theme_few() +
+  ylab("Number of re-dos")
+
+ggplot() +
+#  geom_point(data=id.table, aes(x=teacher, y=m_practices, col=teacher, size=4)) +
+#  ylim(0,4) +
+  geom_jitter(data=id.table, aes(x=age_bin, y=diff,col=more), size=2, width=.2, height=.1) +
+    theme_few() +
+  ylab("Difference in number of re-dos") +
+#  facet_grid(~ age_bin) +
+  geom_hline(yintercept=0,linetype="dashed",size=.5)
+
+ggplot() +
+#  geom_point(data=id.table, aes(x=teacher, y=m_practices, col=teacher, size=4)) +
+#  ylim(0,4) +
+  geom_jitter(data=id.table, aes(x=age, y=diff,col=more), size=1.5, width=.2, height=.1) +
+    theme_few() +
+  ylab("Difference in number of re-dos") +
+#  facet_grid(~ age_bin) +
+  geom_hline(yintercept=0,linetype="dashed",size=.5)
+```
+
+```{r}
+#calculate total time
+overpraise.table = all.data %>%
+  group_by(age_bin,order,id) %>%
+  filter(condition != "tracing", condition != "tryit", condition != "selective") %>%
+  spread(condition, draw_duration) %>%
+  select(age,age_bin, order, id, overpraise)%>%
+  group_by(id, age, age_bin, order) %>%
+  summarize(m_overpraise = mean(overpraise))
+
+selective.table = all.data %>%
+  group_by(age_bin,order,id) %>%
+  filter(condition != "tracing", condition != "tryit", condition != "overpraise") %>%
+  spread(condition, draw_duration) %>%
+  select(age, age_bin, order, id, selective)%>%
+  group_by(id,order) %>%
+  summarize(m_selective = mean(selective))
+
+time.table = full_join(overpraise.table, selective.table)
+
+time.table = time.table %>%
+    group_by(age_bin) %>%
+  mutate(diff = m_selective - m_overpraise,
+         more = ifelse(diff > 0, "sp","op"))
+
+time.counts = time.table %>%
+  group_by(age_bin) %>%
+  summarise(n_sp = sum(more == "sp"),
+            n_op = sum(more == "op"))
+time.counts
+
+id.counts
+
+ggplot(time.table, aes(x=more, y=count,fill=more)) +
+  geom_bar(stat="identity") +
+  xlab("") +
+  theme_few() +
+  guides(fill=FALSE) +
+  facet_grid(~ age_bin) +
+  scale_y_continuous(breaks=c(0,2,4,6,8,10,12))
+
+
+ggplot() +
+#  geom_point(data=id.table, aes(x=teacher, y=m_practices, col=teacher, size=4)) +
+#  ylim(0,4) +
+  geom_jitter(data=time.table, aes(x=age_bin, y=diff,col=more_sp), size=1.5, width=.2, height=.1) +
+    theme_few() +
+  ylab("Difference in draww duration (Selective - Overpraise)") +
+#  facet_grid(~ age_bin) +
+  geom_hline(yintercept=0,linetype="dashed",size=.5)
+
+
+time.tidy = time.table %>%
+  gather(teacher, time, m_selective, m_overpraise)
+
+time.means = time.tidy %>%
+  group_by(teacher) %>%
+  summarize(mean_time = mean(time))
+
+time.means
+
+ggplot() +
+  geom_point(data=time.means, aes(x=teacher, y=mean_time, col=teacher, size=4)) +
+#  ylim(0,4) +
+  geom_jitter(data=time.tidy, aes(x=teacher, y=time), size=.5, width=.1, height=.1) +
+    theme_few() +
+  ylab("Amount of time (seconds)")
+
+
+ggplot() +
+#  geom_point(data=id.table, aes(x=teacher, y=m_practices, col=teacher, size=4)) +
+#  ylim(0,4) +
+  geom_jitter(data=id.table, aes(x=age, y=diff), size=.5, width=.1, height=.1) +
+    theme_few() +
+  ylab("Number of re-dos") +
+  geom_hline(yintercept=0)
+```
+
+Number of strokes.
+```{r}
+overpraise.table = all.data %>%
+  group_by(age_bin,id) %>%
+  filter(condition != "tracing", condition != "tryit", condition != "selective") %>%
+  spread(condition, num_strokes) %>%
+  select(age,age_bin, order, id, overpraise)%>%
+  group_by(id, age_bin, order) %>%
+  summarize(m_overpraise = mean(overpraise))
+
+selective.table = all.data %>%
+  group_by(age_bin,id) %>%
+  filter(condition != "tracing", condition != "tryit", condition != "overpraise") %>%
+  spread(condition, num_strokes) %>%
+  select(age, age_bin, order, id, selective)%>%
+  group_by(id,age_bin,order) %>%
+  summarize(m_selective = mean(selective))
+
+strokes.table = full_join(overpraise.table, selective.table)
+
+strokes.table = strokes.table %>%
+    group_by(age_bin) %>%
+  mutate(diff = m_selective - m_overpraise,
+         more = ifelse(diff > 0, "sp","op"))
+strokes.table
+
+strokes.counts = strokes.table %>%
+  group_by(age_bin) %>%
+  summarise(n_sp = sum(more == "sp"),
+            n_op = sum(more == "op"))
+strokes.counts
+time.counts
+
+
+strokes.tidy = strokes.table %>%
+  gather(teacher, strokes, m_selective, m_overpraise)
+
+strokes.means = strokes.tidy %>%
+  group_by(order,teacher) %>%
+  summarize(mean_strokes = mean(strokes))
+
+strokes.means
+
+ggplot() +
+  geom_point(data=strokes.means, aes(x=teacher, y=mean_strokes, col=teacher, size=4)) +
+#  ylim(0,4) +
+  geom_jitter(data=strokes.tidy, aes(x=teacher, y=strokes), size=.5, width=.1, height=.1) +
+    theme_few() +
+  ylab("Number of strokes") +
+  facet_grid(~ order)
+```
+
+Time tables.
+```{r}
+id.table = all.data %>%
+  group_by(age, age_bin,order,id) %>%
+  summarise(#n_try = sum(condition == "tryit"),
+            sp=sum(condition == "selective"),
+            op = sum(condition =="overpraise"))
+
+id.table
+
+id.means = id.table %>%
+  gather(teacher, practices, sp, op) %>%
+  group_by(teacher) %>%
+  summarize(n=n(),m_practices = mean(practices))
+
+id.means
+
+id.tidy = id.table %>%
+  gather(teacher, practices, sp, op)
+
+id.tidy
+
+ggplot() +
+  geom_point(data=id.means, aes(x=teacher, y=m_practices, col=teacher, size=4)) +
+#  ylim(0,4) +
+  geom_jitter(data=id.tidy, aes(x=teacher, y=practices), size=.5, width=0, height=.1) +
+    theme_few() +
+  ylab("Number of re-dos")
+
+
+
+```
+
+### Initial Plots
+```{r}
+ggplot(id.tidy, aes(x=teacher, y=practices)) +
+    geom_line(aes(group = id), size = 0.5) + 
+   # geom_jitter(width = .1, height =.1,size = 2)+
+  geom_point() +
+  theme_few()
+#  facet_grid(order ~ age)
+
+ggplot(time.tidy, aes(x=teacher, y=time)) +
+    geom_line(aes(group = id), size = 0.5) + 
+   # geom_jitter(width = .1, height =.1,size = 2)+
+  geom_point() +
+  theme_few()
+#  facet_grid(order ~ age)
+
+```
+
+### Analyses
+```{r}
+summary(lmer(time ~ teacher * order * age + (1|id), data=time.tidy))
+
+summary(lmer(practices ~ teacher * age + (1|id), data=id.tidy))
+
+summary(lmer(strokes ~ teacher + order + (1|id), data=strokes.tidy))
+
+```
+
+#### Between-subjects
+```{r}
+overpraise.table = all.data %>%
+  group_by(age_bin,order,id) %>%
+  filter(condition != "tracing", condition != "tryit", condition != "selective") %>%
+  spread(condition, draw_duration) %>%
+  select(age,age_bin, order, id, overpraise)%>%
+  group_by(id, order) %>%
+  filter(order == "overpraise_selective") %>%
+  summarize(age = mean(age),
+            time = mean(overpraise),
+            teacher = "overpraise")
+
+selective.table = all.data %>%
+  group_by(age_bin,order,id) %>%
+  filter(condition != "tracing", condition != "tryit", condition != "overpraise") %>%
+  spread(condition, draw_duration) %>%
+  select(age, age_bin, order, id, selective)%>%
+  group_by(id,order) %>%
+  filter(order == "selective_overpraise") %>%
+  summarize(age = mean(age),
+            time = mean(selective),
+            teacher = "selective")
+
+bw.table = full_join(overpraise.table, selective.table)
+
+ggplot(bw.table, aes(x=teacher, y=time)) +
+   # geom_jitter(width = .1, height =.1,size = 2)+
+  geom_boxplot() +
+  theme_few()
+
+time.table = left_join(time.table, d)
+time.tidy = time.table %>%
+  gather(teacher, time, m_selective, m_overpraise)
+
+time.tidy
+
+```
+
+### Explicit questions
+```{r}
+explicit.table = all.data %>%
+  group_by(id) %>%
+  summarize(n=n(),
+            num_effort_chose_selective = sum(effort_chose_selective)/n,
+            num_pref_chose_selective = sum(pref_chose_selective)/n) %>%
+  ungroup() %>%
+  summarize(effort_chose_selective = sum(num_effort_chose_selective),
+            pref_chose_selective = sum(num_pref_chose_selective),
+            n = n())
 
 explicit.table
 

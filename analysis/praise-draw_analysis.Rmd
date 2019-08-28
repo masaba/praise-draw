@@ -263,7 +263,7 @@ d = read_xlsx("praise-draw_data.xlsx",sheet=2)
 
 Combine and clean.
 ```{r}
-all.raw = full_join(p3.raw,d) # change this later to combine w/ demographics data sheet
+all.raw = full_join(p3.raw,d) 
 
 all.data = all.raw %>%
   select(-session_id, 
@@ -286,6 +286,32 @@ all.data = all.raw %>%
 ```
 
 ### Tables
+Table with tracing time.
+```{r}
+trace.data = all.raw %>%
+  select(-session_id, 
+         -trial_num, 
+         -submit_time, -submit_date, -bounding_box, -filename, -image_name,
+         -count, 
+         -date_tested, 
+         -bing_ID, 
+         -location, 
+         -experimenter, 
+         -redcap) %>%
+  filter(condition == "tracing",
+         subID != "PD2_190715_04",
+         subID != "PD_190712_03") %>%
+  rename(id = subID) %>%
+  mutate(category = factor(category, levels=c("this square","this shape"), labels=c("square","complex")))
+
+trace.table = trace.data %>%
+  group_by(age_bin,category) %>%
+  summarise(avg_time = mean(draw_duration),
+            min_time = min(draw_duration),
+            max_time = max(draw_duration))
+
+```
+
 Table with counts for # of drawings for each teacher.
 ```{r}
 id.table = all.data %>%

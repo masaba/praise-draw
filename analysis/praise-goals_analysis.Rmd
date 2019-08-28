@@ -1,0 +1,90 @@
+---
+title: "Praise goals Analysis"
+author: "Mika Asaba (masaba@stanford.edu)"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    highlight: pygments
+    theme: flatly
+    toc: yes
+    toc_float: true
+  pdf_document:
+    toc: yes
+  word_document:
+    toc: yes
+---
+
+Praise goals
+----------------------------------
+Read in file.
+```{r, message=FALSE}
+pg.raw = read_excel("praise-goals_data.xlsx",sheet=1)
+```
+
+Clean file.
+```{r}
+pg.clean = pg.raw %>%
+#  rename(id = unique_ID) %>%
+  filter(count != 1) %>%
+  mutate(drawing1_teacher = ifelse(drawing1_response == selective_teacher,"sp","op"),
+         drawing2_teacher = ifelse(drawing2_response == selective_teacher,"sp","op"),
+         drawing3_teacher = ifelse(drawing3_response == selective_teacher,"sp","op"),
+         drawing4_teacher = ifelse(drawing4_response == selective_teacher,"sp","op"),
+         drawing1_goal = ifelse(order == "A_I","a","i"),
+         drawing2_goal = ifelse(order == "A_I","a","i"),
+         drawing3_goal = ifelse(order == "A_I","i","a"),
+         drawing4_goal = ifelse(order == "A_I","i","a"),
+         trial1 = paste(drawing1_goal, drawing1_type, drawing1_teacher, sep="_"),
+         trial2 = paste(drawing2_goal, drawing2_type, drawing2_teacher, sep="_"),
+         trial3 = paste(drawing3_goal, drawing3_type, drawing3_teacher, sep="_"),
+         trial4 = paste(drawing4_goal, drawing4_type, drawing4_teacher, sep="_")) %>%
+  select(id, age, age_bin,trial1, trial2, trial3, trial4)
+          
+  
+pg.tidy = pg.clean %>%
+  gather(num, responses, trial1, trial2, trial3, trial4) %>%
+  mutate(goal = substr(responses,1,1),
+         quality = substr(responses,3,3),
+         response = str_sub(responses, start=-2)) %>%
+  select(id, age_bin,goal, quality, response)
+
+pg.table = pg.tidy %>%
+  group_by(goal, quality) %>%
+  mutate(chose_selective = response == "sp") %>%
+  summarise(num_selective = sum(chose_selective),
+            n=n())
+
+pg.table = pg.tidy %>%
+  group_by(age_bin,goal, quality) %>%
+  mutate(chose_selective = response == "sp") %>%
+  summarise(num_selective = sum(chose_selective),
+            n=n())
+```
+
+Just look at first two trials.
+```{r}
+pg.clean.char1 = select(pg.clean, id, age, age_bin, trial1, trial2)
+
+pg.tidy = pg.clean.char1 %>%
+  gather(num, responses, trial1, trial2) %>%
+  mutate(goal = substr(responses,1,1),
+         quality = substr(responses,3,3),
+         response = str_sub(responses, start=-2)) %>%
+  select(id, age_bin,goal, quality, response)
+
+pg.table = pg.tidy %>%
+  group_by(goal, quality) %>%
+  mutate(chose_selective = response == "sp") %>%
+  summarise(num_selective = sum(chose_selective),
+            n=n())
+
+pg.table = pg.tidy %>%
+  group_by(age_bin,goal, quality) %>%
+  mutate(chose_selective = response == "sp") %>%
+  summarise(num_selective = sum(chose_selective),
+            n=n())
+
+
+```
+
+

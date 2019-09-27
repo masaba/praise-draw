@@ -255,10 +255,12 @@ explicit.table
 ##Pilot 3
 Read in file.
 ```{r, message=FALSE}
-p3.raw = read_csv("merged_summer_pilot.csv")
+p3.raw = read_csv("merged_summer_pilot")
 
 #read in demographics and other coded data
 d = read_xlsx("praise-draw_data.xlsx",sheet=2)
+
+
 ```
 
 Combine and clean.
@@ -345,7 +347,7 @@ ggplot(id.counts2, aes(x=type, y=count,fill=type)) +
 
 id.means = id.table %>%
   gather(teacher, practices, sp, op) %>%
-  group_by(teacher) %>%
+  group_by(age_bin,teacher) %>%
   summarize(n=n(),
             m_practices = mean(practices))
 
@@ -361,7 +363,8 @@ ggplot() +
 #  ylim(0,4) +
   geom_jitter(data=id.tidy, aes(x=teacher, y=practices), size=.5, width=.1, height=.1) +
     theme_few() +
-  ylab("Number of re-dos")
+  ylab("Number of re-dos") +
+  facet_grid(~ age_bin)
 
 ggplot() +
 #  geom_point(data=id.table, aes(x=teacher, y=m_practices, col=teacher, size=4)) +
@@ -369,7 +372,7 @@ ggplot() +
   geom_jitter(data=id.table, aes(x=age_bin, y=diff,col=more), size=2, width=.2, height=.1) +
     theme_few() +
   ylab("Difference in number of re-dos") +
-#  facet_grid(~ age_bin) +
+  facet_grid(~ age_bin) +
   geom_hline(yintercept=0,linetype="dashed",size=.5)
 
 ggplot() +
@@ -378,7 +381,7 @@ ggplot() +
   geom_jitter(data=id.table, aes(x=age, y=diff,col=more), size=1.5, width=.2, height=.1) +
     theme_few() +
   ylab("Difference in number of re-dos") +
-#  facet_grid(~ age_bin) +
+  facet_grid(~ age_bin) +
   geom_hline(yintercept=0,linetype="dashed",size=.5)
 ```
 
@@ -413,8 +416,6 @@ time.counts = time.table %>%
             n_op = sum(more == "op"))
 time.counts
 
-id.counts
-
 ggplot(time.table, aes(x=more, y=count,fill=more)) +
   geom_bar(stat="identity") +
   xlab("") +
@@ -422,7 +423,6 @@ ggplot(time.table, aes(x=more, y=count,fill=more)) +
   guides(fill=FALSE) +
   facet_grid(~ age_bin) +
   scale_y_continuous(breaks=c(0,2,4,6,8,10,12))
-
 
 ggplot() +
 #  geom_point(data=id.table, aes(x=teacher, y=m_practices, col=teacher, size=4)) +
@@ -598,10 +598,16 @@ selective.table = all.data %>%
             teacher = "selective")
 
 bw.table = full_join(overpraise.table, selective.table)
+bw.table.older = filter(bw.table, age >= 5)
 
 ggplot(bw.table, aes(x=teacher, y=time)) +
    # geom_jitter(width = .1, height =.1,size = 2)+
   geom_boxplot() +
+  theme_few()
+
+#plot with older kids
+ggplot(bw.table.older, aes(x=teacher, y=time)) +
+    geom_jitter(width = .1, height =.1,size = 2)+
   theme_few()
 
 time.table = left_join(time.table, d)

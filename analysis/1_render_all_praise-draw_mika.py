@@ -1,0 +1,206 @@
+
+## basic library requirements
+from __future__ import division
+
+import os
+import urllib, cStringIO
+
+import numpy as np
+import scipy.stats as stats
+import pandas as pd
+import json
+import re
+
+from PIL import Image
+import base64
+import datetime
+import time
+
+# exclude IDs
+exclude_ids = ['test','Test','']
+
+# set path to database connectinos 
+auth = pd.read_csv('auth.txt', header = None) 
+pswd = auth.values[0][0]
+
+## use pymongo for database
+import pymongo as pm
+conn = pm.MongoClient('mongodb://stanford:' + pswd + '@127.0.0.1')
+db = conn['kiddraw']
+Praisedraw_pilot = db['Praisedraw_pilot_5']
+
+###### ###### ###### TOGGLE HERE WHICH DATABASE
+this_collection = Praisedraw_pilot
+which_run = 'Praisedraw_pilot_5'
+###### ###### ###### ######
+
+###### Where are we rendering these sketches?
+analysis_dir = os.getcwd()
+d = datetime.datetime.today()
+
+sketch_dir = os.path.join(analysis_dir, which_run + '_sketches_' + str(d.month) + '_' + str(d.day) + '_' + str(d.year))
+if not os.path.exists(sketch_dir):
+    os.makedirs(sketch_dir)
+
+output_dir = os.path.join(analysis_dir, which_run + '_descriptives_' + str(d.month) + '_'  + str(d.day) + '_' + str(d.year))
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+
+###### Open up variables for CSV writing
+# basic descriptors
+session_id = []; trial_num = []; category = []; filename = []
+
+# stroke times and duration
+draw_duration = [];
+
+# drawing usage stats
+num_strokes = []
+mean_intensity = []
+bounding_box = []
+
+# trial time and duration
+start_time = []; submit_time = []; trial_duration = []
+
+# other timing variables
+submit_date = []; submit_date_readable=[]
+
+image_name = [] #imageName
+condition = [] #condition
+subID = [] #subID
+CB = [] #CB
+
+
+###### Define functions for use below in getting img intensities and bounding boxes
+def load_image_data(imgData,imsize):
+    filestr = base64.b64decode(imgData)
+    fname = os.path.join('sketch.png')
+    with open(fname, "wb") as fh:
+        fh.write(imgData.decode('base64'))
+    im = Image.open(fname).resize((imsize,imsize))
+    _im = np.array(im)
+    return(_im)
+
+def get_mean_intensity(img,imsize):
+    thresh = 250
+    numpix = imsize**2
+    mean_intensity = len(np.where(img[:,:,3].flatten()>thresh)[0])/numpix
+    return mean_intensity
+    
+def get_bounding_box(img):
+    rows = np.any(img, axis=1)
+    cols = np.any(img, axis=0)
+    rmin, rmax = np.where(rows)[0][[0, -1]]
+    cmin, cmax = np.where(cols)[0][[0, -1]]
+    bounding_box = tuple((rmin, rmax, cmin, cmax))
+    return bounding_box
+
+######MASSIVE LOOP TO RENDER OUT IMAGES & INFO
+# basic variables for counting throughout the loop
+skipCount = 0;
+writeImageCount = 0;
+timeSave = []
+imsize = 224 ## img writing size, optimized for CNN
+countImage = 0
+alreadyWritten = 0
+
+## Get all sessions within this collection
+subIDS_to_render =  this_collection.find({'$and': [{'dataType':'finalImage'},{'subID': {"$nin": exclude_ids}}]}).distinct('subID')
+print 'We currently have {} total subIDs after exclusions/tests.'.format(len(subIDS_to_render))
+
+time_start = time.time() ## 
+
+## Go through each session
+for s in subIDS_to_render:      
+    # in the latest version of museumstation (cdm_run_v4), more info on timing and survey for exclusions
+    image_recs = this_collection.find({'$and': [{'subID':s}, {'dataType':'finalImage'}]}).sort('startTrialTime')    
+    # print 'Writing out {} images for subject {}'.format(image_recs.count(),s)
+
+    ## if they made it past the try it trials
+    if image_recs.count()>1: 
+            for imrec in image_recs:                                                            
+                category_dir = os.path.join(sketch_dir,imrec['condition'])
+                if not os.path.exists(category_dir):
+                    os.makedirs(category_dir)
+                # filename
+                fname = os.path.join(category_dir,'{}_{}_sketch_{}_{}.png'.format(imrec['condition'],imrec['category'],imrec['sessionId'],imrec['subID']))
+                stroke_recs = this_collection.find({'$and': [{'subID':s}, 
+                                  {'dataType':'stroke'},
+                                  {'trialNum': imrec['trialNum']}]}).sort('startTrialTime')   
+
+
+                if stroke_recs.count()==0:
+                    print('skipped image')
+
+                # don't do blank images   
+                elif stroke_recs.count()>0:                               
+                    countImage = countImage + 1;
+                    ## Append session ID, trial Num, category, age                            
+                    session_id.append(imrec['sessionId'])        
+                    trial_num.append(imrec['trialNum']) 
+                    category.append(imrec['category'])
+                    filename.append(fname) # defined
+
+                    CB.append(imrec['CB']) # which counterbalancing
+                    subID.append(imrec['subID']) #unique identifier
+                    condition.append(imrec['condition']) 
+
+                    start_time.append(imrec['startTrialTime'])
+                    submit_time.append(imrec['endTrialTime'])
+                    trial_duration.append((imrec['endTrialTime'] - imrec['startTrialTime'])/1000.00)
+                    readable_date = datetime.datetime.fromtimestamp(imrec['endTrialTime']/1000.0).strftime('%Y-%m-%d %H:%M:%S.%f')
+
+                    ## readable date (not just time, has other info for sanity checks)
+                    submit_date_readable.append(readable_date)
+                    submit_date.append(imrec['date'])
+
+                    for strec in stroke_recs:
+                        _svg_end_times.append(strec['endStrokeTime'])
+                        _svg_start_times.append(strec['startStrokeTime'])
+                        duration = (_svg_end_times[-1] - _svg_start_times[0])/1000
+                                        ## draw duration (last stroke end - first stroke START)
+                        draw_duration.append(duration) ## in seconds
+                        print('drawing duration = {}').format(duration)
+
+                    ## get bounding box and mean pixel intensity
+                    this_image = load_image_data(imrec['imgData'],imsize)
+
+                    this_intensity = get_mean_intensity(this_image,imsize)
+                    if this_intensity>0:
+                        this_bounding_box = get_bounding_box(this_image)
+                    else:
+                        this_bounding_box= tuple((0,0,0,0,))
+                    #
+                    bounding_box.append(this_bounding_box)
+                    mean_intensity.append(this_intensity)
+
+                    ## Write out image data
+                    imgData = imrec['imgData'];
+                    writeImageCount = writeImageCount+1
+
+                    #Write image
+                    with open(fname, "wb") as fh:
+                        fh.write(imgData.decode('base64')) 
+                    
+                    if np.mod(writeImageCount,10)==0:
+                        print('writing images!') # sanity check script is working
+                        
+                    if np.mod(writeImageCount,10)==0:
+                        time_now = time.time() 
+                        time_spent_sec = (time_now - time_start)
+                        time_spent = time_spent_sec/60
+                        print('Weve written {} images at in {} minutes '.format(writeImageCount, time_spent))
+
+                        ## write out csv every 1000 images
+                        # X_out = pd.DataFrame([session_id,trial_num,category,submit_time,submit_date,num_strokes,draw_duration,trial_duration, mean_intensity, bounding_box, filename, condition, CB, subID, image_name])
+                        # X_out = X_out.transpose()
+                        # X_out.columns = ['session_id','trial_num','category','submit_time','submit_date','num_strokes','draw_duration','trial_duration','mean_intensity','bounding_box','filename','condition','CB','subID','image_name']
+                        # X_out.to_csv(os.path.join(output_dir,'Praisedraw_AllDescriptives_{}_images_{}_start_{}.csv'.format(writeImageCount, which_run,alreadyWritten)))
+
+## and at the very end, do this as well
+## pd = pandas
+## making a dataframe w/ all these variables, transpose into columns
+## 
+X_out = pd.DataFrame([session_id,trial_num,category,submit_time,submit_date,num_strokes,draw_duration,trial_duration, mean_intensity, bounding_box, filename,condition, CB, subID, image_name])
+X_out = X_out.transpose()
+X_out.columns = ['session_id','trial_num','category','submit_time','submit_date','num_strokes','draw_duration','trial_duration','mean_intensity','bounding_box','filename','condition','CB','subID','image_name']
+X_out.to_csv(os.path.join(output_dir,'Praisedraw_AllDescriptives_{}_images_final_{}.csv'.format(writeImageCount,which_run)))   

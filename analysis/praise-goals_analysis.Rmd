@@ -37,8 +37,9 @@ pg.clean = pg.raw %>%
          trial1 = paste(drawing1_goal, drawing1_type, drawing1_teacher, sep="_"),
          trial2 = paste(drawing2_goal, drawing2_type, drawing2_teacher, sep="_"),
          trial3 = paste(drawing3_goal, drawing3_type, drawing3_teacher, sep="_"),
-         trial4 = paste(drawing4_goal, drawing4_type, drawing4_teacher, sep="_")) %>%
-  select(id, age, age_bin,trial1, trial2, trial3, trial4)
+         trial4 = paste(drawing4_goal, drawing4_type, drawing4_teacher, sep="_"),
+         id = subID) %>%
+  select(id, age, age_bin, trial1, trial2, trial3, trial4)
           
   
 pg.tidy = pg.clean %>%
@@ -46,7 +47,7 @@ pg.tidy = pg.clean %>%
   mutate(goal = substr(responses,1,1),
          quality = substr(responses,3,3),
          response = str_sub(responses, start=-2)) %>%
-  select(id, age_bin,goal, quality, response)
+  select(id, age_bin, goal, quality, response)
 
 pg.table = pg.tidy %>%
   group_by(goal, quality) %>%
@@ -55,7 +56,7 @@ pg.table = pg.tidy %>%
             n=n())
 
 pg.table = pg.tidy %>%
-  group_by(age_bin,goal, quality) %>%
+  group_by(age_bin, goal, quality) %>%
   mutate(chose_selective = response == "sp") %>%
   summarise(num_selective = sum(chose_selective),
             n=n())
@@ -70,7 +71,7 @@ pg.tidy = pg.clean.char1 %>%
   mutate(goal = substr(responses,1,1),
          quality = substr(responses,3,3),
          response = str_sub(responses, start=-2)) %>%
-  select(id, age_bin,goal, quality, response)
+  select(id, age_bin, goal, quality, response)
 
 pg.table = pg.tidy %>%
   group_by(goal, quality) %>%

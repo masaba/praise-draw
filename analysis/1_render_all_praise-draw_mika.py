@@ -149,17 +149,23 @@ for s in subIDS_to_render:
                     trial_duration.append((imrec['endTrialTime'] - imrec['startTrialTime'])/1000.00)
                     readable_date = datetime.datetime.fromtimestamp(imrec['endTrialTime']/1000.0).strftime('%Y-%m-%d %H:%M:%S.%f')
 
-                    ## readable date (not just time, has other info for sanity checks)
+                    ## readable date (not just time, has other info for sanity cecks)
                     submit_date_readable.append(readable_date)
                     submit_date.append(imrec['date'])
+
+                    ## Count number of strokes and timing information as well on stroke basis
+                    num_strokes.append(stroke_recs.count())
+                    _svg_end_times = []
+                    _svg_start_times = []
 
                     for strec in stroke_recs:
                         _svg_end_times.append(strec['endStrokeTime'])
                         _svg_start_times.append(strec['startStrokeTime'])
-                        duration = (_svg_end_times[-1] - _svg_start_times[0])/1000
+
+                    duration = (_svg_end_times[-1] - _svg_start_times[0])/1000
                                         ## draw duration (last stroke end - first stroke START)
-                        draw_duration.append(duration) ## in seconds
-                        print('drawing duration = {}').format(duration)
+                    draw_duration.append(duration) ## in seconds
+                    print('drawing duration = {}').format(duration)
 
                     ## get bounding box and mean pixel intensity
                     this_image = load_image_data(imrec['imgData'],imsize)

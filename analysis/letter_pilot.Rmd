@@ -1,5 +1,5 @@
 ---
-title: "molly letters pilot"
+title: "New praise task pilot"
 author: "Mika Asaba (masaba@stanford.edu)"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:
@@ -33,7 +33,7 @@ library(janitor)
 library(viridis)
 ```
 
-Pilot
+Pilot data
 ----------------------------------------
 Read in file.
 ```{r, message=FALSE}
@@ -51,41 +51,81 @@ Clean
 ------------------
 ```{r}
 clean_d = filter_d %>%
-  mutate(teacher_type = ifelse(tracing_teacher == selective_teacher, "sp","op"),
-         improve_sp = ifelse(get_better == selective_teacher, "sp","op"))
+  mutate(teacher_type = ifelse(tracing_teacher == selective_teacher, "sp","op"))
+
+improve_d = filter_d %>%
+  filter(get_better == "linda" | get_better == "karen") %>%
+  mutate(improve_sp = get_better == selective_teacher)
+
+exploratory_d = filter_d %>%
+  filter(forced_choice_version == FALSE) %>%
+  mutate(difficult_sp = hard_tracing == selective_teacher,
+         classroom_sp = classroom_prefer == selective_teacher)
+
+fc_d = clean_d %>%
+  filter(forced_choice_version == TRUE)
+
+curr_d = clean_d %>%
+  filter(forced_choice_version == FALSE)
 ```
 
-Tables
+Version 1: Do you want to practice or not?
 -------------------
 ```{r}
-table.1 = clean_d %>%
+fc_table = fc_d %>%
   group_by(teacher_type) %>%
   summarize(n_practice = sum(choose_practice == "yes"),
-            n = n())
+            prop_practice = n_practice/n(),
+            n=n())
 
-table.2 = clean_d %>%
-  group_by(teacher_type, age_bin) %>%
-  summarize(n_practice = sum(choose_practice == "yes"),
-            n = n())
-
-table.3 = clean_d %>%
-  group_by(teacher_type) %>%
-  summarize(number_practice = sum(choose_practice == "yes"),
-            n = n())
-
-table.1 = clean_d %>%
-#  group_by(teacher_type) %>%
-  summarize(n_improve_sp = sum(improve_sp == "sp"),
-            n = n())
+ggplot(fc_d, aes(teacher_type)) +
+  geom_bar(aes(fill=choose_practice)) +
+# ylim(0,10) +
+  theme_few()
 ```
 
-Plot
----------------------
+Version 2: Removed force choice question
+-------------------
 ```{r}
-ggplot(clean_d, aes(x = teacher_type, y = number_practices)) +
-  geom_jitter(width=.1, height=.1)
-
+ggplot(curr_d, aes(x = teacher_type, y = number_practices)) +
+  geom_jitter(width=.1, height=.1) +
+  theme_few()
 ```
 
+Exploratory questions
+-------------------
+```{r, message=FALSE, echo=FALSE}
+#improvement
+ggplot(improve_d,aes(location)) +
+  geom_bar(aes(fill=improve_sp),width=.5) +
+  ylim(0,16) +
+  theme_few() +
+  ggtitle("Which teacher would help you get better at tracings?") +
+  theme(legend.title = element_blank(),
+        axis.text.x=element_blank(),
+        axis.title.x=element_blank()) +
+  scale_fill_discrete(labels = c("selective","overpraise"))
 
+#help with difficult tracing
+ggplot(exploratory_d,aes(location)) +
+  geom_bar(aes(fill=difficult_sp),width=.5) +
+  ylim(0,5) +
+  theme_few() +
+  ggtitle("Imagine that you were trying a really hard tracing. \n Who would you want to talk to?") +
+  theme(legend.title = element_blank(),
+        axis.text.x=element_blank(),
+        axis.title.x=element_blank()) +
+  scale_fill_discrete(labels = c("selective","overpraise"))
+
+#classroom
+ggplot(exploratory_d,aes(location)) +
+  geom_bar(aes(fill=classroom_sp),width=.5) +
+  ylim(0,5) +
+  theme_few() +
+  ggtitle("Which teacher would you like to have in your classroom?") +
+  theme(legend.title = element_blank(),
+        axis.text.x=element_blank(),
+        axis.title.x=element_blank()) +
+  scale_fill_discrete(labels = c("selective","overpraise"))
+```
 

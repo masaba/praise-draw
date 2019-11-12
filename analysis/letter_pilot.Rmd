@@ -104,7 +104,7 @@ ggplot(improve_d,aes(location)) +
   theme(legend.title = element_blank(),
         axis.text.x=element_blank(),
         axis.title.x=element_blank()) +
-  scale_fill_discrete(labels = c("selective","overpraise"))
+  scale_fill_discrete(labels = c("overpraise","selective"))
 
 #help with difficult tracing
 ggplot(exploratory_d,aes(location)) +
@@ -115,7 +115,7 @@ ggplot(exploratory_d,aes(location)) +
   theme(legend.title = element_blank(),
         axis.text.x=element_blank(),
         axis.title.x=element_blank()) +
-  scale_fill_discrete(labels = c("selective","overpraise"))
+  scale_fill_discrete(labels = c("overpraise","selective"))
 
 #classroom
 ggplot(exploratory_d,aes(location)) +
@@ -126,6 +126,6 @@ ggplot(exploratory_d,aes(location)) +
   theme(legend.title = element_blank(),
         axis.text.x=element_blank(),
         axis.title.x=element_blank()) +
-  scale_fill_discrete(labels = c("selective","overpraise"))
+  scale_fill_discrete(labels = c("overpraise","selective"))
 ```
 

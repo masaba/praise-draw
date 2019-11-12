@@ -1,0 +1,91 @@
+---
+title: "molly letters pilot"
+author: "Mika Asaba (masaba@stanford.edu)"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:
+  html_document:
+    highlight: pygments
+    theme: flatly
+    toc: yes
+    toc_float: true
+  pdf_document:
+    toc: yes
+  word_document:
+    toc: yes
+---
+
+Libraries.
+```{r echo=FALSE, message=FALSE}
+rm(list=ls())
+
+knitr::opts_chunk$set(fig.width=8, fig.height=5, 
+                      echo=TRUE, warning=FALSE, message=FALSE, cache=TRUE)
+
+library(psych)
+library(langcog)
+library(tidyverse)
+library(ggthemes)
+library(lme4)
+library(lmerTest)
+library(readxl)
+library(here)
+library(janitor)
+library(viridis)
+```
+
+Pilot
+----------------------------------------
+Read in file.
+```{r, message=FALSE}
+pilot.raw = read_excel("praise-draw_data.xlsx",sheet=3)
+```
+
+Filter
+-------------------
+```{r}
+filter_d = pilot.raw %>%
+  filter(age > 5)
+```
+
+Clean
+------------------
+```{r}
+clean_d = filter_d %>%
+  mutate(teacher_type = ifelse(tracing_teacher == selective_teacher, "sp","op"),
+         improve_sp = ifelse(get_better == selective_teacher, "sp","op"))
+```
+
+Tables
+-------------------
+```{r}
+table.1 = clean_d %>%
+  group_by(teacher_type) %>%
+  summarize(n_practice = sum(choose_practice == "yes"),
+            n = n())
+
+table.2 = clean_d %>%
+  group_by(teacher_type, age_bin) %>%
+  summarize(n_practice = sum(choose_practice == "yes"),
+            n = n())
+
+table.3 = clean_d %>%
+  group_by(teacher_type) %>%
+  summarize(number_practice = sum(choose_practice == "yes"),
+            n = n())
+
+table.1 = clean_d %>%
+#  group_by(teacher_type) %>%
+  summarize(n_improve_sp = sum(improve_sp == "sp"),
+            n = n())
+```
+
+Plot
+---------------------
+```{r}
+ggplot(clean_d, aes(x = teacher_type, y = number_practices)) +
+  geom_jitter(width=.1, height=.1)
+
+```
+
+
+
